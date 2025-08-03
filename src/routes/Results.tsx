@@ -18,7 +18,6 @@ export default function Results() {
 
   const rNum = Number(roundNumber || 1);
 
-  // Wait for data
   if (!game) {
     return <Layout title="Chargement">Chargement…</Layout>;
   }
@@ -35,7 +34,6 @@ export default function Results() {
   const config = presets.standard;
   const isLocked = !!round.locked;
 
-  // Build local state now that game and round exist
   const [local, setLocal] = useState<Record<string, any>>(() => {
     const o: Record<string, any> = {};
     for (const p of game.players) {
@@ -67,7 +65,7 @@ export default function Results() {
         adjustedBid,
         entry.tricks,
         rNum,
-        entry.bonus, // specials do not affect score
+        entry.bonus,
         config
       );
 
@@ -109,10 +107,25 @@ export default function Results() {
                 await unlockRound(game.id, rNum);
               }}
             >
-              Modifier cette manche
+              Déverrouiller
             </button>
           </div>
         )}
+
+        <div className="card p-3 flex items-center justify-between">
+          <div className="text-sm opacity-80">
+            Besoin d’ajuster les paris de cette manche ?
+          </div>
+          <button
+            className="btn btn-ghost"
+            onClick={async () => {
+              if (isLocked) await unlockRound(game.id, rNum);
+              nav(`/game/${game.id}/round/${rNum}/bets`);
+            }}
+          >
+            Modifier les paris
+          </button>
+        </div>
       </div>
 
       <div className="space-y-6 mt-2">

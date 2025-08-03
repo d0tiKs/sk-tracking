@@ -1,8 +1,8 @@
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
 import NumberStepper from '../components/NumberStepper';
-import { useEffect, useMemo, useState } from 'react';
 import { Round } from '../types';
 import { uid } from '../lib/utils';
 import { useStore } from '../store/useStore';
@@ -11,13 +11,14 @@ export default function Bets() {
   const { gameId, roundNumber } = useParams();
   const nav = useNavigate();
   const { game, rounds } = useGame(gameId);
-  const { upsertRound } = useStore();
+  const { upsertRound, unlockRound } = useStore();
   const rNum = Number(roundNumber);
 
   const round = useMemo(
     () => rounds.find((r) => r.roundNumber === rNum),
     [rounds, rNum]
-  );
+  ) as Round | undefined;
+
   const [bids, setBids] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -36,7 +37,8 @@ export default function Bets() {
 
   if (!game) return null;
 
-  const maxBid = rNum +1 ;
+  const isLocked = !!round?.locked;
+  const maxBid = rNum + 1;
   const totalTricks = rNum;
 
   const saveAndNext = async () => {
@@ -66,7 +68,10 @@ export default function Bets() {
     nav(`/game/${game.id}/round/${rNum}/results`);
   };
 
-  const sumBids = (Object.values(bids) as number[]).reduce((a, b) => a + b, 0);
+  const sumBids = (Object.values(bids) as number[]).reduce(
+    (a, b) => a + b,
+    0
+  );
 
   return (
     <Layout
@@ -78,6 +83,22 @@ export default function Bets() {
       }
     >
       <div className="space-y-4">
+        {isLocked && (
+          <div className="card p-3 flex items-center justify-between">
+            <div className="text-sm opacity-80">
+              Manche verrouillée. Déverrouillez pour modifier les paris.
+            </div>
+            <button
+              className="btn btn-ghost"
+              onClick={async () => {
+                await unlockRound(game.id, rNum);
+              }}
+            >
+              Déverrouiller
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center gap-3">
           <span className="badge badge-ok">Plis: {totalTricks}</span>
           <span
@@ -89,7 +110,11 @@ export default function Bets() {
           </span>
         </div>
 
-        <ul className="space-y-3">
+        <ul
+          className={`space-y-3 ${
+            isLocked ? 'pointer-events-none opacity-60' : ''
+          }`}
+        >
           {game.players.map((p) => (
             <li
               key={p.id}

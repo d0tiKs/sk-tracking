@@ -12,11 +12,13 @@ export default function Dashboard() {
   if (!game) return null;
 
   const totals: Record<string, number> = {};
-  type ResMap = Record<string, { score?: number }>;
   for (const p of game.players) totals[p.id] = 0;
   for (const r of rounds) {
-    for (const [pid, res] of Object.entries(r.results as ResMap)) {
-      totals[pid] += res.score ?? 0;
+    for (const [pid, res] of Object.entries(r.results) as [
+      string,
+      { score?: number }
+    ][]) {
+      totals[pid] += res?.score ?? 0;
     }
   }
 
@@ -24,8 +26,8 @@ export default function Dashboard() {
     .map((p) => ({ ...p, total: totals[p.id] ?? 0 }))
     .sort((a, b) => b.total - a.total);
 
-  const goToRound = (n: number) =>
-    nav(`/game/${game.id}/round/${n}/results`);
+  const goToRound = (n: number) => nav(`/game/${game.id}/round/${n}/results`);
+  const goToBids = (n: number) => nav(`/game/${game.id}/round/${n}/bets`);
 
   return (
     <Layout
@@ -90,24 +92,55 @@ export default function Dashboard() {
                             key={p.id}
                             className="px-2 py-2 cursor-pointer"
                             onClick={() => goToRound(n)}
+                            title="Voir/éditer les résultats"
                           >
                             {r?.results[p.id]?.score ?? ''}
                           </td>
                         ))}
                         <td className="px-2 py-2">
-                          {locked ? (
-                            <button
-                              className="btn btn-ghost"
-                              onClick={async () => {
-                                await unlockRound(game.id, n);
-                                goToRound(n);
-                              }}
-                            >
-                              Modifier
-                            </button>
-                          ) : (
-                            <span className="text-xs opacity-60">ouvert</span>
-                          )}
+                          <div className="flex gap-2">
+                            {locked ? (
+                              <>
+                                <button
+                                  className="btn btn-ghost"
+                                  onClick={async () => {
+                                    await unlockRound(game.id, n);
+                                    goToBids(n);
+                                  }}
+                                  title="Modifier les paris"
+                                >
+                                  Paris
+                                </button>
+                                <button
+                                  className="btn btn-ghost"
+                                  onClick={async () => {
+                                    await unlockRound(game.id, n);
+                                    goToRound(n);
+                                  }}
+                                  title="Modifier les résultats"
+                                >
+                                  Résultats
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="btn btn-ghost"
+                                  onClick={() => goToBids(n)}
+                                  title="Modifier les paris"
+                                >
+                                  Paris
+                                </button>
+                                <button
+                                  className="btn btn-ghost"
+                                  onClick={() => goToRound(n)}
+                                  title="Modifier les résultats"
+                                >
+                                  Résultats
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
