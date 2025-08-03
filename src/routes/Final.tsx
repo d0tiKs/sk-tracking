@@ -10,10 +10,12 @@ export default function Final() {
   if (!game) return null;
 
   const totals: Record<string, number> = {};
+  type ResMap = Record<string, { score?: number }>;
   for (const p of game.players) totals[p.id] = 0;
   for (const r of rounds) {
-    for (const [pid, res] of Object.entries(r.results))
+    for (const [pid, res] of Object.entries(r.results as ResMap)) {
       totals[pid] += res.score ?? 0;
+    }
   }
   const ranking = [...game.players].sort(
     (a, b) => totals[b.id] - totals[a.id]

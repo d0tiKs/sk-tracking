@@ -1,20 +1,31 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
+import { useStore } from '../store/useStore';
 
 export default function Dashboard() {
   const { gameId } = useParams();
+  const nav = useNavigate();
   const { game, rounds } = useGame(gameId);
+  const { unlockRound } = useStore();
 
   if (!game) return null;
 
   const totals: Record<string, number> = {};
+  type ResMap = Record<string, { score?: number }>;
   for (const p of game.players) totals[p.id] = 0;
   for (const r of rounds) {
-    for (const [pid, res] of Object.entries(r.results)) {
+    for (const [pid, res] of Object.entries(r.results as ResMap)) {
       totals[pid] += res.score ?? 0;
     }
   }
+
+  const ranking = [...game.players]
+    .map((p) => ({ ...p, total: totals[p.id] ?? 0 }))
+    .sort((a, b) => b.total - a.total);
+
+  const goToRound = (n: number) =>
+    nav(`/game/${game.id}/round/${n}/results`);
 
   return (
     <Layout
@@ -28,48 +39,92 @@ export default function Dashboard() {
         </Link>
       }
     >
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-white/5">
-              <tr>
-                <th className="px-3 py-2">Manche</th>
-                {game.players.map((p) => (
-                  <th key={p.id} className="px-2 py-2">
-                    {p.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: game.totalRounds }, (_, i) => i + 1).map(
-                (n) => {
-                  const r = rounds.find((rr) => rr.roundNumber === n);
-                  return (
-                    <tr
-                      key={n}
-                      className={n === game.currentRound ? 'bg-accent/10' : ''}
-                    >
-                      <td className="px-3 py-2">{n}</td>
-                      {game.players.map((p) => (
-                        <td key={p.id} className="px-2 py-2">
-                          {r?.results[p.id]?.score ?? ''}
+      <div className="space-y-4">
+        <div className="card p-4">
+          <div className="text-lg font-semibold mb-2">Classement actuel</div>
+          <ol className="space-y-1">
+            {ranking.map((p, i) => (
+              <li key={p.id} className="flex items-center justify-between">
+                <div>
+                  {i + 1}. {p.name}
+                </div>
+                <div className="font-medium tabular-nums">{p.total}</div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-white/5">
+                <tr>
+                  <th className="px-3 py-2">Manche</th>
+                  {game.players.map((p) => (
+                    <th key={p.id} className="px-2 py-2">
+                      {p.name}
+                    </th>
+                  ))}
+                  <th className="px-2 py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: game.totalRounds }, (_, i) => i + 1).map(
+                  (n) => {
+                    const r = rounds.find((rr) => rr.roundNumber === n);
+                    const locked = r?.locked ?? false;
+                    return (
+                      <tr
+                        key={n}
+                        className={n === game.currentRound ? 'bg-accent/10' : ''}
+                      >
+                        <td
+                          className="px-3 py-2 cursor-pointer hover:underline"
+                          onClick={() => goToRound(n)}
+                          title="Voir/éditer les résultats"
+                        >
+                          {n}
                         </td>
-                      ))}
-                    </tr>
-                  );
-                }
-              )}
-              <tr className="border-t border-white/10 bg-white/5">
-                <td className="px-3 py-2 font-semibold">Total</td>
-                {game.players.map((p) => (
-                  <td key={p.id} className="px-2 py-2 font-semibold">
-                    {totals[p.id]}
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+                        {game.players.map((p) => (
+                          <td
+                            key={p.id}
+                            className="px-2 py-2 cursor-pointer"
+                            onClick={() => goToRound(n)}
+                          >
+                            {r?.results[p.id]?.score ?? ''}
+                          </td>
+                        ))}
+                        <td className="px-2 py-2">
+                          {locked ? (
+                            <button
+                              className="btn btn-ghost"
+                              onClick={async () => {
+                                await unlockRound(game.id, n);
+                                goToRound(n);
+                              }}
+                            >
+                              Modifier
+                            </button>
+                          ) : (
+                            <span className="text-xs opacity-60">ouvert</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  }
+                )}
+                <tr className="border-t border-white/10 bg-white/5">
+                  <td className="px-3 py-2 font-semibold">Total</td>
+                  {game.players.map((p) => (
+                    <td key={p.id} className="px-2 py-2 font-semibold">
+                      {totals[p.id]}
+                    </td>
+                  ))}
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </Layout>

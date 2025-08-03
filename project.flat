@@ -1,5 +1,29 @@
 ---START-'.:'---
 ---END-'.:'---
+---START-'./index.html:'---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Skull King Scorekeeper</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>---END-'./index.html:'---
+---START-'./postcss.config.cjs:'---
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {}
+  }
+};---END-'./postcss.config.cjs:'---
 ---START-'./public:'---
 ---END-'./public:'---
 ---START-'./public/manifest.webmanifest:'---
@@ -21,10 +45,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: '#0b132b',
-        surface: '#1c2541',
-        accent: '#3a506b',
-        text: '#e0e1dd',
+        bg: '#0a0f1a',
+        surface: '#121a2a',
+        accent: '#3a86ff',
+        text: '#e6e9ef',
         ok: '#3ddc97',
         bad: '#ef476f'
       }
@@ -128,43 +152,9 @@ export default defineConfig({
     })
   ]
 });---END-'./vite.config.ts:'---
+---START-'./
 ---START-'./src:'---
 ---END-'./src:'---
----START-'./src/score.ts:'---
-import { ScoringConfig } from '../config/scoringConfig';
-
-export function calculateScore(
-  bid: number,
-  tricks: number,
-  roundNumber: number,
-  bonus: number,
-  config: ScoringConfig
-): number {
-  if (bid === 0) {
-    return tricks === 0
-      ? config.zeroBidMultiplier * roundNumber + bonus
-      : -config.zeroBidFailMultiplier * roundNumber + bonus;
-  }
-  if (bid === tricks) {
-    return bid * config.pointsPerSuccessfulTrick + bonus;
-  }
-  const diff = Math.abs(bid - tricks);
-  return -diff * config.failedBidPenaltyPerTrick + bonus;
-}
-
-export function computeBonusFromSpecials(
-  specials: Record<string, number | undefined>,
-  config: ScoringConfig
-): number {
-  let sum = 0;
-  for (const [key, count] of Object.entries(specials)) {
-    const n = count ?? 0;
-    const rule = config.specials[key];
-    if (!rule) continue;
-    if (rule.points) sum += n * rule.points;
-  }
-  return sum;
-}---END-'./src/score.ts:'---
 ---START-'./src/App.tsx:'---
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './routes/Home';
@@ -201,7 +191,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </BrowserRouter>
   </React.StrictMode>
 );---END-'./src/main.tsx:'---
----START-'./src/scoringConfig.ts:'---
+---START-'./src/config:'---
+---END-'./src/config:'---
+---START-'./src/config/scoringConfig.ts:'---
 export interface SpecialRule {
   id: string;
   icon: string;
@@ -222,7 +214,7 @@ export interface ScoringConfig {
 export const standardScoring: ScoringConfig = {
   pointsPerSuccessfulTrick: 20,
   failedBidPenaltyPerTrick: 10,
-  zeroBidMultiplier: 10,
+  zeroBidMultiplier: 20,
   zeroBidFailMultiplier: 10,
   allowHarryAdjustment: true,
   specials: {
@@ -235,14 +227,14 @@ export const standardScoring: ScoringConfig = {
 
 export const presets = {
   standard: standardScoring
-};---END-'./src/scoringConfig.ts:'---
+};---END-'./src/config/scoringConfig.ts:'---
 ---START-'./src/index.css:'---
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 html,
@@ -257,6 +249,43 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Helpers */
+.container-app {
+  @apply max-w-screen-sm mx-auto px-3 sm:px-4;
+}
+
+.card {
+  @apply rounded-xl bg-surface/90 border border-white/5 shadow-lg;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors;
+}
+.btn-primary {
+  @apply bg-accent hover:bg-accent/90 text-white;
+}
+.btn-ghost {
+  @apply bg-surface hover:bg-surface/80;
+}
+.btn-danger {
+  @apply bg-red-700 hover:bg-red-600 text-white;
+}
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+}
+.badge-ok {
+  @apply bg-emerald-700/50 text-emerald-200;
+}
+.badge-bad {
+  @apply bg-rose-700/50 text-rose-200;
+}
+.input {
+  @apply rounded-lg bg-surface/80 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/50;
+}
+.section-title {
+  @apply text-sm uppercase tracking-widest text-white/70;
 }---END-'./src/index.css:'---
 ---START-'./src/types.ts:'---
 export type UUID = string;
@@ -323,24 +352,40 @@ export default function CardCounter({
   value: number;
   onChange: (v: number) => void;
 }) {
+  const vibrate = () => {
+    try {
+      navigator.vibrate?.(10);
+    } catch {}
+  };
   return (
-    <div className="flex items-center gap-2">
-      <button
-        className="px-2 py-1 rounded bg-surface hover:bg-accent"
-        onClick={() => onChange(Math.max(0, value - 1))}
-        aria-label={`remove ${label}`}
-      >
-        −
-      </button>
-      <div className="min-w-[3rem] text-center">{icon} {value}</div>
-      <button
-        className="px-2 py-1 rounded bg-surface hover:bg-accent"
-        onClick={() => onChange(value + 1)}
-        aria-label={`add ${label}`}
-      >
-        +
-      </button>
-      <span className="opacity-70">{label}</span>
+    <div className="flex items-center justify-between rounded-lg bg-surface/60 border border-white/5 px-3 py-2">
+      <div className="flex items-center gap-2">
+        <span className="text-xl leading-none">{icon}</span>
+        <span className="opacity-80">{label}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          className="btn btn-ghost px-2 py-1"
+          onClick={() => {
+            onChange(Math.max(0, value - 1));
+            vibrate();
+          }}
+          aria-label={`remove ${label}`}
+        >
+          −
+        </button>
+        <div className="w-10 text-center tabular-nums">{value}</div>
+        <button
+          className="btn btn-ghost px-2 py-1"
+          onClick={() => {
+            onChange(value + 1);
+            vibrate();
+          }}
+          aria-label={`add ${label}`}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 }---END-'./src/components/CardCounter.tsx:'---
@@ -358,11 +403,22 @@ export default function NumberStepper({
   max?: number;
   onChange: (v: number) => void;
 }) {
-  const dec = () => onChange(Math.max(min, value - 1));
-  const inc = () => onChange(Math.min(max, value + 1));
+  const vibrate = () => {
+    try {
+      navigator.vibrate?.(10);
+    } catch {}
+  };
+  const dec = () => {
+    onChange(Math.max(min, value - 1));
+    vibrate();
+  };
+  const inc = () => {
+    onChange(Math.min(max, value + 1));
+    vibrate();
+  };
   return (
     <div className="inline-flex items-center gap-2">
-      <button className="px-3 py-1 rounded bg-surface hover:bg-accent" onClick={dec} aria-label="decrease">
+      <button className="btn btn-ghost px-3 py-2" onClick={dec} aria-label="decrease">
         −
       </button>
       <input
@@ -370,12 +426,12 @@ export default function NumberStepper({
         value={value}
         min={min}
         max={max}
-        onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value))))}
-        className={clsx(
-          'w-16 text-center rounded bg-surface border border-accent focus:outline-none focus:ring-2'
-        )}
+        onChange={(e) =>
+          onChange(Math.max(min, Math.min(max, Number(e.target.value))))
+        }
+        className={clsx('input w-16 text-center')}
       />
-      <button className="px-3 py-1 rounded bg-surface hover:bg-accent" onClick={inc} aria-label="increase">
+      <button className="btn btn-ghost px-3 py-2" onClick={inc} aria-label="increase">
         +
       </button>
     </div>
@@ -383,21 +439,37 @@ export default function NumberStepper({
 }---END-'./src/components/NumberStepper.tsx:'---
 ---START-'./src/components/ScoreChip.tsx:'---
 export default function ScoreChip({ value }: { value: number }) {
-  const color = value >= 0 ? 'bg-green-700' : 'bg-red-700';
-  return <span className={`px-3 py-1 rounded ${color}`}>{value}</span>;
+  const positive = value >= 0;
+  const cls = positive ? 'badge badge-ok' : 'badge badge-bad';
+  return <span className={cls}>{positive ? `+${value}` : value}</span>;
 }---END-'./src/components/ScoreChip.tsx:'---
 ---START-'./src/components/Layout.tsx:'---
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function Layout({ title, children }: { title: string; children: ReactNode }) {
+export default function Layout({
+  title,
+  right,
+  children
+}: {
+  title: string;
+  right?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <div className="min-h-full flex flex-col">
-      <header className="sticky top-0 z-10 bg-surface/90 backdrop-blur px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="text-xl font-semibold">Skull King</Link>
-        <span className="opacity-70">{title}</span>
+      <header className="sticky top-0 z-10 bg-gradient-to-b from-surface/95 to-surface/70 backdrop-blur border-b border-white/5">
+        <div className="container-app flex items-center justify-between py-3">
+          <Link to="/" className="text-lg font-semibold tracking-tight">
+            Skull King
+          </Link>
+          <div className="text-sm opacity-80">{title}</div>
+          <div className="flex items-center gap-2">{right ?? null}</div>
+        </div>
       </header>
-      <main className="flex-1 p-4">{children}</main>
+      <main className="flex-1">
+        <div className="container-app py-4">{children}</div>
+      </main>
     </div>
   );
 }---END-'./src/components/Layout.tsx:'---
@@ -416,6 +488,41 @@ export function useGame(gameId?: string) {
 }---END-'./src/hooks/useGame.ts:'---
 ---START-'./src/lib:'---
 ---END-'./src/lib:'---
+---START-'./src/lib/score.ts:'---
+import { ScoringConfig } from '../config/scoringConfig';
+
+export function calculateScore(
+  bid: number,
+  tricks: number,
+  roundNumber: number,
+  bonus: number,
+  config: ScoringConfig
+): number {
+  if (bid === 0) {
+    return tricks === 0
+      ? config.zeroBidMultiplier * roundNumber + bonus
+      : -config.zeroBidFailMultiplier * roundNumber + bonus;
+  }
+  if (bid === tricks) {
+    return bid * config.pointsPerSuccessfulTrick + bonus;
+  }
+  const diff = Math.abs(bid - tricks);
+  return -diff * config.failedBidPenaltyPerTrick + bonus;
+}
+
+export function computeBonusFromSpecials(
+  specials: Record<string, number | undefined>,
+  config: ScoringConfig
+): number {
+  let sum = 0;
+  for (const [key, count] of Object.entries(specials)) {
+    const n = count ?? 0;
+    const rule = config.specials[key];
+    if (!rule) continue;
+    if (rule.points) sum += n * rule.points;
+  }
+  return sum;
+}---END-'./src/lib/score.ts:'---
 ---START-'./src/lib/utils.ts:'---
 import { nanoid } from 'nanoid';
 
@@ -511,24 +618,28 @@ import { useGame } from '../hooks/useGame';
 import { useMemo, useState } from 'react';
 import NumberStepper from '../components/NumberStepper';
 import CardCounter from '../components/CardCounter';
-import { presets } from '../config/scoringConfig';
-import { computeBonusFromSpecials, calculateScore } from '../lib/score';
+import { presets } from '../scoringConfig';
+import { calculateScore } from '../score';
 import { Round } from '../types';
-import { uid } from '../lib/utils';
 import { useStore } from '../store/useStore';
 
 export default function Results() {
   const { gameId, roundNumber } = useParams();
   const nav = useNavigate();
   const { game, rounds } = useGame(gameId);
-  const { upsertRound, setCurrentRound, completeGame } = useStore();
+  const { upsertRound, setCurrentRound, completeGame, unlockRound } = useStore();
   const rNum = Number(roundNumber);
   const config = presets.standard;
+  const isLocked = !!round?.locked;
 
-  const round = useMemo<Round | undefined>(() => rounds.find((r) => r.roundNumber === rNum), [rounds, rNum]);
+  const round = useMemo<Round | undefined>(
+    () => rounds.find((r) => r.roundNumber === rNum),
+    [rounds, rNum]
+  );
 
   const [local, setLocal] = useState(() => {
-    if (!game) return {};
+    if (!game) return <Layout title="Chargement">Chargement…</Layout>;
+    if (!round) return <Layout title="Erreur">Round introuvable</Layout>;
     const o: any = {};
     for (const p of game.players) {
       const existing = round?.results[p.id];
@@ -557,8 +668,15 @@ export default function Results() {
       const pid = p.id;
       const entry = (local as any)[pid];
       const specialsBonus = computeBonusFromSpecials(entry.specials, config);
-      const adjustedBid = entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
-      const score = calculateScore(adjustedBid, entry.tricks, rNum, entry.bonus + specialsBonus, config);
+      const adjustedBid =
+        entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
+      const score = calculateScore(
+        adjustedBid,
+        entry.tricks,
+        rNum,
+        entry.bonus,
+        config
+      );
 
       updated.bids[pid] = {
         playerId: pid,
@@ -585,89 +703,179 @@ export default function Results() {
   };
 
   return (
-    <Layout title={`Résultats manche ${rNum}`}>
-      <div className="space-y-6">
+      <Layout title={`Résultats · Manche ${rNum}`}>
+      <div className="space-y-4">
+        {isLocked && (
+          <div className="card p-3 flex items-center justify-between">
+            <div className="text-sm opacity-80">
+              Manche verrouillée. Déverrouillez pour modifier les résultats.
+            </div>
+            <button
+              className="btn btn-ghost"
+              onClick={async () => {
+                await unlockRound(game.id, rNum);
+              }}
+            >
+              Modifier cette manche
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="space-y-6 mt-2">
         {game.players.map((p) => {
           const entry = (local as any)[p.id];
           const specialsBonus = computeBonusFromSpecials(entry.specials, config);
-          const adjustedBid = entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
-          const projected = calculateScore(adjustedBid, entry.tricks, rNum, entry.bonus + specialsBonus, config);
-
+          const adjustedBid =
+            entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
+          const projected = calculateScore(
+            adjustedBid,
+            entry.tricks,
+            rNum,
+            entry.bonus, // <-- no specials bonus
+            config
+          );
           return (
-            <div key={p.id} className="rounded bg-surface p-3 space-y-3">
+            <div key={p.id} className="card p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold">{p.name}</h4>
-                <div className="opacity-70">Pari: {entry.bid} {entry.harry ? `(Harry ${entry.harry > 0 ? '+1' : '-1'})` : ''}</div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span>Plis réalisés</span>
-                <NumberStepper value={entry.tricks} min={0} max={rNum} onChange={(v) => setPlayer(p.id, 'tricks', v)} />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span>Harry The Giant (ajustement pari)</span>
-                <div className="flex items-center gap-2">
-                  <button className={`px-3 py-1 rounded ${entry.harry === -1 ? 'bg-accent' : 'bg-surface'}`} onClick={() => setPlayer(p.id, 'harry', -1)}>-1</button>
-                  <button className={`px-3 py-1 rounded ${entry.harry === 0 ? 'bg-accent' : 'bg-surface'}`} onClick={() => setPlayer(p.id, 'harry', 0)}>0</button>
-                  <button className={`px-3 py-1 rounded ${entry.harry === 1 ? 'bg-accent' : 'bg-surface'}`} onClick={() => setPlayer(p.id, 'harry', 1)}>+1</button>
+                <h4 className="font-semibold text-lg">{p.name}</h4>
+                <div className="opacity-80">
+                  Pari: {entry.bid}{' '}
+                  {entry.harry
+                    ? `(Harry ${entry.harry > 0 ? '+1' : '-1'})`
+                    : ''}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span>Bonus (+10 / -10)</span>
-                <div className="flex items-center gap-2">
-                  <button className="px-3 py-1 rounded bg-surface" onClick={() => setPlayer(p.id, 'bonus', entry.bonus - 10)}>-10</button>
-                  <span>{entry.bonus}</span>
-                  <button className="px-3 py-1 rounded bg-surface" onClick={() => setPlayer(p.id, 'bonus', entry.bonus + 10)}>+10</button>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center justify-between">
+                  <span>Plis réalisés</span>
+                  <NumberStepper
+                    value={entry.tricks}
+                    min={0}
+                    max={rNum}
+                    onChange={(v) => setPlayer(p.id, 'tricks', v)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span>Harry The Giant (ajustement pari)</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className={`btn btn-ghost ${
+                        entry.harry === -1 ? 'ring-2 ring-accent/50' : ''
+                      }`}
+                      onClick={() => setPlayer(p.id, 'harry', -1)}
+                    >
+                      −1
+                    </button>
+                    <button
+                      className={`btn btn-ghost ${
+                        entry.harry === 0 ? 'ring-2 ring-accent/50' : ''
+                      }`}
+                      onClick={() => setPlayer(p.id, 'harry', 0)}
+                    >
+                      0
+                    </button>
+                    <button
+                      className={`btn btn-ghost ${
+                        entry.harry === 1 ? 'ring-2 ring-accent/50' : ''
+                      }`}
+                      onClick={() => setPlayer(p.id, 'harry', 1)}
+                    >
+                      +1
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span>Bonus (+10 / -10)</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setPlayer(p.id, 'bonus', entry.bonus - 10)}
+                    >
+                      −10
+                    </button>
+                    <span className="w-12 text-center tabular-nums">
+                      {entry.bonus}
+                    </span>
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setPlayer(p.id, 'bonus', entry.bonus + 10)}
+                    >
+                      +10
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <CardCounter
-                  icon="💀👑"
-                  label="Skull King"
-                  value={entry.specials.skullKing ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, skullKing: v })
-                  }
-                />
-                <CardCounter
-                  icon="🏴‍☠️"
-                  label="Pirate"
-                  value={entry.specials.pirates ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, pirates: v })
-                  }
-                />
-                <CardCounter
-                  icon="🧜‍♀️"
-                  label="Sirène"
-                  value={entry.specials.mermaids ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, mermaids: v })
-                  }
-                />
-                <CardCounter
-                  icon="🪙"
-                  label="Pièce"
-                  value={entry.specials.coins ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
-                  }
-                />
+                <div className="section-title">Cartes spéciales</div>
+                <div className="grid grid-cols-1 gap-2">
+                  <CardCounter
+                    icon="💀👑"
+                    label="Skull King"
+                    value={entry.specials.skullKing ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', {
+                        ...entry.specials,
+                        skullKing: v
+                      })
+                    }
+                  />
+                  <CardCounter
+                    icon="🏴‍☠️"
+                    label="Pirate"
+                    value={entry.specials.pirates ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', {
+                        ...entry.specials,
+                        pirates: v
+                      })
+                    }
+                  />
+                  <CardCounter
+                    icon="🧜‍♀️"
+                    label="Sirène"
+                    value={entry.specials.mermaids ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', {
+                        ...entry.specials,
+                        mermaids: v
+                      })
+                    }
+                  />
+                  <CardCounter
+                    icon="🪙"
+                    label="Pièce"
+                    value={entry.specials.coins ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
+                    }
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-accent/40">
-                <span>Score projeté</span>
-                <span className={projected >= 0 ? 'text-green-400' : 'text-red-400'}>{projected}</span>
+              <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                <span className="opacity-80">Score projeté</span>
+                <span
+                  className={
+                    projected >= 0
+                      ? 'text-green-400 font-semibold'
+                      : 'text-red-400 font-semibold'
+                  }
+                >
+                  {projected >= 0 ? `+${projected}` : projected}
+                </span>
               </div>
             </div>
           );
         })}
 
         <div className="flex justify-end">
-          <button className="px-4 py-2 rounded bg-accent" onClick={saveRound}>Valider la manche</button>
+          <button className="btn btn-primary" onClick={saveRound}>
+            Valider la manche
+          </button>
         </div>
       </div>
     </Layout>
@@ -688,9 +896,12 @@ export default function Final() {
   const totals: Record<string, number> = {};
   for (const p of game.players) totals[p.id] = 0;
   for (const r of rounds) {
-    for (const [pid, res] of Object.entries(r.results)) totals[pid] += res.score ?? 0;
+    for (const [pid, res] of Object.entries(r.results))
+      totals[pid] += res.score ?? 0;
   }
-  const ranking = [...game.players].sort((a, b) => totals[b.id] - totals[a.id]);
+  const ranking = [...game.players].sort(
+    (a, b) => totals[b.id] - totals[a.id]
+  );
 
   const doCSV = () => {
     const blob = exportCSV(game, rounds);
@@ -714,29 +925,37 @@ export default function Final() {
 
   return (
     <Layout title="Résultat final">
-      <div className="space-y-4">
-        <ol className="list-decimal pl-6">
-          {ranking.map((p, i) => (
-            <li key={p.id} className="mb-1">
-              {i + 1}. {p.name} — {totals[p.id]} pts
-            </li>
-          ))}
-        </ol>
-
-        <div className="flex gap-2">
-          <button className="px-3 py-2 rounded bg-accent" onClick={doCSV}>Exporter CSV</button>
-          <button className="px-3 py-2 rounded bg-accent" onClick={doXLSX}>Exporter Excel</button>
+      <div className="space-y-6">
+        <div className="card p-4">
+          <div className="text-xl font-semibold mb-2">Classement</div>
+          <ol className="pl-6 space-y-1">
+            {ranking.map((p, i) => (
+              <li key={p.id}>
+                {i + 1}. {p.name} — {totals[p.id]} pts
+              </li>
+            ))}
+          </ol>
+          <div className="flex gap-2 mt-4">
+            <button className="btn btn-primary" onClick={doCSV}>
+              Exporter CSV
+            </button>
+            <button className="btn btn-ghost" onClick={doXLSX}>
+              Exporter Excel
+            </button>
+          </div>
         </div>
 
-        <div className="mt-6">
-          <h3 className="font-semibold mb-2">Historique</h3>
+        <div className="card p-4">
+          <div className="text-lg font-semibold mb-2">Historique</div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead>
+              <thead className="bg-white/5">
                 <tr>
-                  <th>Manche</th>
+                  <th className="px-2 py-2">Manche</th>
                   {game.players.map((p) => (
-                    <th key={p.id} className="px-2">{p.name}</th>
+                    <th key={p.id} className="px-2 py-2">
+                      {p.name}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -745,7 +964,9 @@ export default function Final() {
                   <tr key={r.id}>
                     <td className="px-2 py-1">{r.roundNumber}</td>
                     {game.players.map((p) => (
-                      <td key={p.id} className="px-2 py-1">{r.results[p.id]?.score ?? ''}</td>
+                      <td key={p.id} className="px-2 py-1">
+                        {r.results[p.id]?.score ?? ''}
+                      </td>
                     ))}
                   </tr>
                 ))}
@@ -758,13 +979,16 @@ export default function Final() {
   );
 }---END-'./src/routes/Final.tsx:'---
 ---START-'./src/routes/Dashboard.tsx:'---
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
+import { useStore } from '../store/useStore';
 
 export default function Dashboard() {
   const { gameId } = useParams();
+  const nav = useNavigate();
   const { game, rounds } = useGame(gameId);
+  const { unlockRound } = useStore();
 
   if (!game) return null;
 
@@ -776,47 +1000,112 @@ export default function Dashboard() {
     }
   }
 
+  const ranking = [...game.players]
+    .map((p) => ({ ...p, total: totals[p.id] ?? 0 }))
+    .sort((a, b) => b.total - a.total);
+
+  const goToRound = (n: number) =>
+    nav(`/game/${game.id}/round/${n}/results`);
+
   return (
-    <Layout title="Tableau de bord">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr>
-              <th>Manche</th>
-              {game.players.map((p) => (
-                <th key={p.id} className="px-2">{p.name}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: game.totalRounds }, (_, i) => i + 1).map((n) => {
-              const r = rounds.find((rr) => rr.roundNumber === n);
-              return (
-                <tr key={n} className={n === game.currentRound ? 'bg-accent/20' : ''}>
-                  <td className="px-2 py-1">{n}</td>
-                  {game.players.map((p) => (
-                    <td key={p.id} className="px-2 py-1">
-                      {r?.results[p.id]?.score ?? ''}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-            <tr className="border-t border-accent/40">
-              <td className="px-2 py-1 font-semibold">Total</td>
-              {game.players.map((p) => (
-                <td key={p.id} className="px-2 py-1 font-semibold">
-                  {totals[p.id]}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div className="mt-4">
-        <Link className="px-3 py-2 rounded bg-surface" to={`/game/${game.id}/round/${game.currentRound}/bets`}>
+    <Layout
+      title="Tableau de bord"
+      right={
+        <Link
+          className="btn btn-ghost"
+          to={`/game/${game.id}/round/${game.currentRound}/bets`}
+        >
           Retour
         </Link>
+      }
+    >
+      <div className="space-y-4">
+        <div className="card p-4">
+          <div className="text-lg font-semibold mb-2">Classement actuel</div>
+          <ol className="space-y-1">
+            {ranking.map((p, i) => (
+              <li key={p.id} className="flex items-center justify-between">
+                <div>
+                  {i + 1}. {p.name}
+                </div>
+                <div className="font-medium tabular-nums">{p.total}</div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-white/5">
+                <tr>
+                  <th className="px-3 py-2">Manche</th>
+                  {game.players.map((p) => (
+                    <th key={p.id} className="px-2 py-2">
+                      {p.name}
+                    </th>
+                  ))}
+                  <th className="px-2 py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: game.totalRounds }, (_, i) => i + 1).map(
+                  (n) => {
+                    const r = rounds.find((rr) => rr.roundNumber === n);
+                    const locked = r?.locked ?? false;
+                    return (
+                      <tr
+                        key={n}
+                        className={n === game.currentRound ? 'bg-accent/10' : ''}
+                      >
+                        <td
+                          className="px-3 py-2 cursor-pointer hover:underline"
+                          onClick={() => goToRound(n)}
+                          title="Voir/éditer les résultats"
+                        >
+                          {n}
+                        </td>
+                        {game.players.map((p) => (
+                          <td
+                            key={p.id}
+                            className="px-2 py-2 cursor-pointer"
+                            onClick={() => goToRound(n)}
+                          >
+                            {r?.results[p.id]?.score ?? ''}
+                          </td>
+                        ))}
+                        <td className="px-2 py-2">
+                          {locked ? (
+                            <button
+                              className="btn btn-ghost"
+                              onClick={async () => {
+                                await unlockRound(game.id, n);
+                                goToRound(n);
+                              }}
+                            >
+                              Modifier
+                            </button>
+                          ) : (
+                            <span className="text-xs opacity-60">ouvert</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  }
+                )}
+                <tr className="border-t border-white/10 bg-white/5">
+                  <td className="px-3 py-2 font-semibold">Total</td>
+                  {game.players.map((p) => (
+                    <td key={p.id} className="px-2 py-2 font-semibold">
+                      {totals[p.id]}
+                    </td>
+                  ))}
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </Layout>
   );
@@ -836,42 +1125,62 @@ export default function Home() {
   }, [loadGames]);
 
   return (
-    <Layout title="Accueil">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl">Parties</h2>
-        <Link to="/new" className="px-3 py-2 rounded bg-accent">Nouvelle partie</Link>
-      </div>
-      <ul className="space-y-3">
-        {games.map((g) => (
-          <li key={g.id} className="p-3 rounded bg-surface flex justify-between items-center">
-            <div>
-              <div className="font-semibold">{g.players.map((p) => p.name).join(' • ')}</div>
-              <div className="text-sm opacity-70">
-                {g.status} • Manche {g.currentRound}/{g.totalRounds}
+    <Layout
+      title="Accueil"
+      right={
+        <Link to="/new" className="btn btn-primary">
+          Nouvelle partie
+        </Link>
+      }
+    >
+      <div className="space-y-4">
+        {games.length === 0 && (
+          <div className="card p-6 text-center">
+            <div className="text-xl font-semibold mb-2">Bienvenue</div>
+            <p className="opacity-80 mb-4">
+              Lancez une nouvelle partie de Skull King.
+            </p>
+            <Link to="/new" className="btn btn-primary">
+              Démarrer
+            </Link>
+          </div>
+        )}
+
+        <ul className="space-y-3">
+          {games.map((g) => (
+            <li key={g.id} className="card p-4 flex justify-between items-center">
+              <div>
+                <div className="font-semibold text-lg">
+                  {g.players.map((p) => p.name).join(' • ')}
+                </div>
+                <div className="text-sm opacity-70 mt-1">
+                  {g.status === 'completed' ? 'Terminé' : 'En cours'} • Manche{' '}
+                  {g.currentRound}/{g.totalRounds}
+                </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="px-3 py-1 rounded bg-accent"
-                onClick={() => {
-                  if (g.status === 'completed') nav(`/game/${g.id}/final`);
-                  else nav(`/game/${g.id}/round/${g.currentRound}/bets`);
-                }}
-              >
-                Charger
-              </button>
-              <button
-                className="px-3 py-1 rounded bg-red-800"
-                onClick={() => {
-                  if (confirm('Supprimer la partie ?')) deleteGame(g.id);
-                }}
-              >
-                Supprimer
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    if (g.status === 'completed') nav(`/game/${g.id}/final`);
+                    else nav(`/game/${g.id}/round/${g.currentRound}/bets`);
+                  }}
+                >
+                  Ouvrir
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => {
+                    if (confirm('Supprimer la partie ?')) deleteGame(g.id);
+                  }}
+                >
+                  Supprimer
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </Layout>
   );
 }---END-'./src/routes/Home.tsx:'---
@@ -893,8 +1202,10 @@ export default function NewGame() {
     { id: uid(), name: 'Joueur 2' }
   ]);
 
-  const addPlayer = () => setPlayers((ps) => [...ps, { id: uid(), name: `Joueur ${ps.length + 1}` }]);
-  const removePlayer = (id: string) => setPlayers((ps) => ps.filter((p) => p.id !== id));
+  const addPlayer = () =>
+    setPlayers((ps) => [...ps, { id: uid(), name: `Joueur ${ps.length + 1}` }]);
+  const removePlayer = (id: string) =>
+    setPlayers((ps) => ps.filter((p) => p.id !== id));
   const updateName = (id: string, name: string) =>
     setPlayers((ps) => ps.map((p) => (p.id === id ? { ...p, name } : p)));
 
@@ -912,23 +1223,28 @@ export default function NewGame() {
   return (
     <Layout title="Configuration">
       <div className="space-y-6">
-        <section>
-          <h3 className="font-semibold mb-2">Manches</h3>
+        <section className="card p-4">
+          <div className="section-title mb-2">Manches</div>
           <NumberStepper value={rounds} min={1} max={20} onChange={setRounds} />
         </section>
-        <section>
-          <h3 className="font-semibold mb-2">Joueurs</h3>
+
+        <section className="card p-4">
+          <div className="section-title mb-3">Joueurs</div>
           <div className="space-y-2">
             {players.map((p, idx) => (
               <div key={p.id} className="flex items-center gap-2">
-                <span className="w-6 text-right">{idx + 1}.</span>
+                <span className="w-6 text-right opacity-70">{idx + 1}.</span>
                 <input
-                  className="flex-1 rounded bg-surface px-3 py-2"
+                  className="input flex-1"
                   value={p.name}
                   onChange={(e) => updateName(p.id, e.target.value)}
+                  placeholder={`Joueur ${idx + 1}`}
                 />
                 {players.length > 2 && (
-                  <button className="px-2 py-1 bg-red-800 rounded" onClick={() => removePlayer(p.id)}>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => removePlayer(p.id)}
+                  >
                     Retirer
                   </button>
                 )}
@@ -936,14 +1252,21 @@ export default function NewGame() {
             ))}
           </div>
           {players.length < 10 && (
-            <button className="mt-3 px-3 py-2 rounded bg-accent" onClick={addPlayer}>
+            <button className="btn btn-ghost mt-3" onClick={addPlayer}>
               Ajouter un joueur
             </button>
           )}
         </section>
-        <button disabled={!canStart} className="px-4 py-2 bg-accent rounded disabled:opacity-50" onClick={start}>
-          Démarrer
-        </button>
+
+        <div className="flex justify-end">
+          <button
+            disabled={!canStart}
+            className="btn btn-primary disabled:opacity-50"
+            onClick={start}
+          >
+            Démarrer la partie
+          </button>
+        </div>
       </div>
     </Layout>
   );
@@ -965,7 +1288,10 @@ export default function Bets() {
   const { upsertRound } = useStore();
   const rNum = Number(roundNumber);
 
-  const round = useMemo<Round | undefined>(() => rounds.find((r) => r.roundNumber === rNum), [rounds, rNum]);
+  const round = useMemo<Round | undefined>(
+    () => rounds.find((r) => r.roundNumber === rNum),
+    [rounds, rNum]
+  );
   const [bids, setBids] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -984,18 +1310,19 @@ export default function Bets() {
 
   if (!game) return null;
 
-  const maxBid = rNum; // standard: up to round number
+  const maxBid = rNum +1 ;
   const totalTricks = rNum;
 
   const saveAndNext = async () => {
-    const newRound: Round = round ?? {
-      id: uid(),
-      gameId: game.id,
-      roundNumber: rNum,
-      bids: {},
-      results: {},
-      locked: false
-    };
+    const newRound: Round =
+      round ?? {
+        id: uid(),
+        gameId: game.id,
+        roundNumber: rNum,
+        bids: {},
+        results: {},
+        locked: false
+      };
     for (const p of game.players) {
       newRound.bids[p.id] = {
         playerId: p.id,
@@ -1016,13 +1343,33 @@ export default function Bets() {
   const sumBids = Object.values(bids).reduce((a, b) => a + b, 0);
 
   return (
-    <Layout title={`Manche ${rNum}: Paris`}>
+    <Layout
+      title={`Manche ${rNum} · Paris`}
+      right={
+        <Link className="btn btn-ghost" to={`/game/${game.id}/dashboard`}>
+          Tableau
+        </Link>
+      }
+    >
       <div className="space-y-4">
-        <div className="opacity-80">Plis possibles: {totalTricks}</div>
+        <div className="flex items-center gap-3">
+          <span className="badge badge-ok">Plis: {totalTricks}</span>
+          <span
+            className={`badge ${
+              sumBids === totalTricks ? 'badge-ok' : 'badge-bad'
+            }`}
+          >
+            Total paris: {sumBids}
+          </span>
+        </div>
+
         <ul className="space-y-3">
           {game.players.map((p) => (
-            <li key={p.id} className="p-3 rounded bg-surface flex items-center justify-between">
-              <span>{p.name}</span>
+            <li
+              key={p.id}
+              className="card p-4 flex items-center justify-between"
+            >
+              <span className="font-medium">{p.name}</span>
               <NumberStepper
                 value={bids[p.id] ?? 0}
                 min={0}
@@ -1032,12 +1379,11 @@ export default function Bets() {
             </li>
           ))}
         </ul>
-        <div className="flex items-center justify-between">
-          <span>Total des paris: {sumBids}</span>
-          <div className="flex gap-2">
-            <Link className="px-3 py-2 rounded bg-surface" to={`/game/${game.id}/dashboard`}>Tableau</Link>
-            <button className="px-4 py-2 rounded bg-accent" onClick={saveAndNext}>Valider</button>
-          </div>
+
+        <div className="flex items-center justify-end gap-2">
+          <button className="btn btn-primary" onClick={saveAndNext}>
+            Valider les paris
+          </button>
         </div>
       </div>
     </Layout>
@@ -1062,6 +1408,7 @@ interface StoreState {
   completeGame: (id: UUID) => Promise<void>;
   deleteGame: (id: UUID) => Promise<void>;
   setCurrentRound: (n: number) => Promise<void>;
+  unlockRound: (gameId: UUID, roundNumber: number) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -1114,5 +1461,21 @@ export const useStore = create<StoreState>((set, get) => ({
     if (!g) return;
     await db.games.update(g.id, { currentRound: n, updatedAt: Date.now() });
     await get().loadGame(g.id);
+  },
+  async unlockRound(gameId, roundNumber) {
+  const round = await db.rounds.where({ gameId, roundNumber }).first();
+  if (!round) return;
+  await db.rounds.update(round.id, { locked: false });
+  // also move currentRound pointer back if needed
+  const g = await db.games.get(gameId);
+  if (g && g.currentRound < roundNumber) {
+    // nothing to do
+  } else if (g && g.currentRound > roundNumber) {
+    await db.games.update(gameId, {
+      currentRound: roundNumber,
+      updatedAt: Date.now()
+    });
   }
+  await get().loadGame(gameId);
+}
 }));---END-'./src/store/useStore.ts:'---

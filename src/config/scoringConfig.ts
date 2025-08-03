@@ -18,7 +18,7 @@ export interface ScoringConfig {
 export const standardScoring: ScoringConfig = {
   pointsPerSuccessfulTrick: 20,
   failedBidPenaltyPerTrick: 10,
-  zeroBidMultiplier: 10,
+  zeroBidMultiplier: 20,
   zeroBidFailMultiplier: 10,
   allowHarryAdjustment: true,
   specials: {

@@ -14,6 +14,7 @@ interface StoreState {
   completeGame: (id: UUID) => Promise<void>;
   deleteGame: (id: UUID) => Promise<void>;
   setCurrentRound: (n: number) => Promise<void>;
+  unlockRound: (gameId: UUID, roundNumber: number) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -55,10 +56,8 @@ export const useStore = create<StoreState>((set, get) => ({
     await get().loadGame(id);
   },
   async deleteGame(id) {
-    await db.transaction('rw', db.games, db.rounds, async () => {
-      await db.rounds.where('gameId').equals(id).delete();
-      await db.games.delete(id);
-    });
+    await db.rounds.where('gameId').equals(id).delete();
+    await db.games.delete(id);
     await get().loadGames();
   },
   async setCurrentRound(n) {
@@ -66,5 +65,21 @@ export const useStore = create<StoreState>((set, get) => ({
     if (!g) return;
     await db.games.update(g.id, { currentRound: n, updatedAt: Date.now() });
     await get().loadGame(g.id);
+  },
+  async unlockRound(gameId, roundNumber) {
+  const round = await db.rounds.where({ gameId, roundNumber }).first();
+  if (!round) return;
+  await db.rounds.update(round.id, { locked: false });
+  // also move currentRound pointer back if needed
+  const g = await db.games.get(gameId);
+  if (g && g.currentRound < roundNumber) {
+    // nothing to do
+  } else if (g && g.currentRound > roundNumber) {
+    await db.games.update(gameId, {
+      currentRound: roundNumber,
+      updatedAt: Date.now()
+    });
   }
+  await get().loadGame(gameId);
+}
 }));

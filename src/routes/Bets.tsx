@@ -14,7 +14,7 @@ export default function Bets() {
   const { upsertRound } = useStore();
   const rNum = Number(roundNumber);
 
-  const round = useMemo<Round | undefined>(
+  const round = useMemo(
     () => rounds.find((r) => r.roundNumber === rNum),
     [rounds, rNum]
   );
@@ -36,7 +36,7 @@ export default function Bets() {
 
   if (!game) return null;
 
-  const maxBid = rNum;
+  const maxBid = rNum +1 ;
   const totalTricks = rNum;
 
   const saveAndNext = async () => {
@@ -66,7 +66,7 @@ export default function Bets() {
     nav(`/game/${game.id}/round/${rNum}/results`);
   };
 
-  const sumBids = Object.values(bids).reduce((a, b) => a + b, 0);
+  const sumBids = (Object.values(bids) as number[]).reduce((a, b) => a + b, 0);
 
   return (
     <Layout

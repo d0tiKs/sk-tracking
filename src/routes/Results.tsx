@@ -1,11 +1,11 @@
+import React, { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
-import { useMemo, useState } from 'react';
 import NumberStepper from '../components/NumberStepper';
 import CardCounter from '../components/CardCounter';
 import { presets } from '../config/scoringConfig';
-import { computeBonusFromSpecials, calculateScore } from '../lib/score';
+import { calculateScore } from '../lib/score';
 import { Round } from '../types';
 import { useStore } from '../store/useStore';
 
@@ -13,26 +13,39 @@ export default function Results() {
   const { gameId, roundNumber } = useParams();
   const nav = useNavigate();
   const { game, rounds } = useGame(gameId);
-  const { upsertRound, setCurrentRound, completeGame } = useStore();
-  const rNum = Number(roundNumber);
-  const config = presets.standard;
+  const { upsertRound, setCurrentRound, completeGame, unlockRound } =
+    useStore();
+
+  const rNum = Number(roundNumber || 1);
+
+  // Wait for data
+  if (!game) {
+    return <Layout title="Chargement">Chargement…</Layout>;
+  }
 
   const round = useMemo<Round | undefined>(
     () => rounds.find((r) => r.roundNumber === rNum),
     [rounds, rNum]
   );
 
-  const [local, setLocal] = useState(() => {
-    if (!game) return {};
-    const o: any = {};
+  if (!round) {
+    return <Layout title="Erreur">Round introuvable</Layout>;
+  }
+
+  const config = presets.standard;
+  const isLocked = !!round.locked;
+
+  // Build local state now that game and round exist
+  const [local, setLocal] = useState<Record<string, any>>(() => {
+    const o: Record<string, any> = {};
     for (const p of game.players) {
-      const existing = round?.results[p.id];
-      const bid = round?.bids[p.id]?.bid ?? 0;
-      const adj = round?.bids[p.id]?.betAdjustedByHarry ?? 0;
+      const existing = round.results[p.id];
+      const bid = round.bids[p.id]?.bid ?? 0;
+      const adj = round.bids[p.id]?.betAdjustedByHarry ?? 0;
       o[p.id] = {
         tricks: existing?.tricks ?? 0,
         bonus: existing?.bonus ?? 0,
-        harry: adj as -1 | 0 | 1,
+        harry: (adj as -1 | 0 | 1) ?? 0,
         specials: { ...(existing?.specialCards ?? {}) },
         bid
       };
@@ -40,25 +53,21 @@ export default function Results() {
     return o;
   });
 
-  if (!game) return null;
-  if (!round) return <Layout title="Erreur">Round introuvable</Layout>;
-
   const setPlayer = (pid: string, key: string, value: any) =>
-    setLocal((s: any) => ({ ...s, [pid]: { ...s[pid], [key]: value } }));
+    setLocal((s) => ({ ...s, [pid]: { ...s[pid], [key]: value } }));
 
   const saveRound = async () => {
     const updated: Round = { ...round };
     for (const p of game.players) {
       const pid = p.id;
-      const entry = (local as any)[pid];
-      const specialsBonus = computeBonusFromSpecials(entry.specials, config);
+      const entry = local[pid];
       const adjustedBid =
         entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
       const score = calculateScore(
         adjustedBid,
         entry.tricks,
         rNum,
-        entry.bonus + specialsBonus,
+        entry.bonus, // specials do not affect score
         config
       );
 
@@ -88,17 +97,34 @@ export default function Results() {
 
   return (
     <Layout title={`Résultats · Manche ${rNum}`}>
-      <div className="space-y-6">
+      <div className="space-y-4">
+        {isLocked && (
+          <div className="card p-3 flex items-center justify-between">
+            <div className="text-sm opacity-80">
+              Manche verrouillée. Déverrouillez pour modifier les résultats.
+            </div>
+            <button
+              className="btn btn-ghost"
+              onClick={async () => {
+                await unlockRound(game.id, rNum);
+              }}
+            >
+              Modifier cette manche
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-6 mt-2">
         {game.players.map((p) => {
-          const entry = (local as any)[p.id];
-          const specialsBonus = computeBonusFromSpecials(entry.specials, config);
+          const entry = local[p.id];
           const adjustedBid =
             entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
           const projected = calculateScore(
             adjustedBid,
             entry.tricks,
             rNum,
-            entry.bonus + specialsBonus,
+            entry.bonus,
             config
           );
 
@@ -178,7 +204,9 @@ export default function Results() {
               </div>
 
               <div className="space-y-2">
-                <div className="section-title">Cartes spéciales</div>
+                <div className="section-title">
+                  Historique des cartes spéciales
+                </div>
                 <div className="grid grid-cols-1 gap-2">
                   <CardCounter
                     icon="💀👑"
