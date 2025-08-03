@@ -3,6 +3,14 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+    server: {
+    // Add your domain(s) here. You can use strings or RegExp.
+    allowedHosts: ["ravens-mac-studio.raven-locrian.ts.net"],
+
+    // Optional: if you're proxying or binding to a specific host/port
+    // host: "0.0.0.0",
+    port: 5174,
+  },
   plugins: [
     react(),
     VitePWA({

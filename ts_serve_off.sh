@@ -2,4 +2,4 @@
 
 set -x
 
-tailscale serve --http=3333 off
+tailscale serve --https=5174 off
