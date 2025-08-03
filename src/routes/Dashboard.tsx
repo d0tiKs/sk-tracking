@@ -3,6 +3,14 @@ import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
 import { useStore } from '../store/useStore';
 
+type PlayerRoundView = {
+  bid?: number;
+  harry?: number;
+  tricks?: number;
+  bonus?: number;
+  score?: number;
+};
+
 export default function Dashboard() {
   const { gameId } = useParams();
   const nav = useNavigate();
@@ -11,6 +19,7 @@ export default function Dashboard() {
 
   if (!game) return null;
 
+  // Totals
   const totals: Record<string, number> = {};
   for (const p of game.players) totals[p.id] = 0;
   for (const r of rounds) {
@@ -22,9 +31,29 @@ export default function Dashboard() {
     }
   }
 
+  // Ranking
   const ranking = [...game.players]
     .map((p) => ({ ...p, total: totals[p.id] ?? 0 }))
     .sort((a, b) => b.total - a.total);
+
+  const rankIcon = (i: number) =>
+    i === 0 ? '👑' : i === 1 ? '🏴‍☠️' : i === 2 ? '🧜‍♀️' : i === 3 ? '👶' : '';
+
+  // Helper to render a player’s view for a round
+  const cellData = (roundNumber: number, playerId: string): PlayerRoundView => {
+    const r = rounds.find((rr) => rr.roundNumber === roundNumber);
+    if (!r) return {};
+    const bid = r.bids[playerId]?.bid;
+    const harry = r.bids[playerId]?.betAdjustedByHarry ?? 0;
+    const res = r.results[playerId];
+    return {
+      bid,
+      harry,
+      tricks: res?.tricks,
+      bonus: res?.bonus,
+      score: res?.score
+    };
+  };
 
   const goToRound = (n: number) => nav(`/game/${game.id}/round/${n}/results`);
   const goToBids = (n: number) => nav(`/game/${game.id}/round/${n}/bets`);
@@ -42,35 +71,42 @@ export default function Dashboard() {
       }
     >
       <div className="space-y-4">
+        {/* Current ranking with icons */}
         <div className="card p-4">
           <div className="text-lg font-semibold mb-2">Classement actuel</div>
           <ol className="space-y-1">
             {ranking.map((p, i) => (
               <li key={p.id} className="flex items-center justify-between">
-                <div>
-                  {i + 1}. {p.name}
-                </div>
-                <div className="font-medium tabular-nums">{p.total}</div>
+                <span>
+                  {i + 1}.<span className="ml-1">{rankIcon(i)}</span> {p.name} 
+                </span>
+                <span className="font-medium tabular-nums">{p.total}</span>
               </li>
             ))}
           </ol>
         </div>
 
+        {/* Per-round detailed table */}
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-white/5">
-                <tr>
-                  <th className="px-3 py-2">Manche</th>
+              <thead className="bg-whiteA-5">
+                <tr className="text-sm">
+                  <th className="px-3 py-3 w-20">Manche</th>
                   {game.players.map((p) => (
-                    <th key={p.id} className="px-2 py-2">
-                      {p.name}
+                    <th key={p.id} className="px-2 py-3 min-w-[200px]">
+                      <div className="font-medium">{p.name}</div>
+                      <div className="text-[11px] opacity-60 mt-0.5">
+                        Pari · Harry · Plis
+                        <span className="mx-2">|</span>
+                        Bonus · Score
+                      </div>
                     </th>
                   ))}
-                  <th className="px-2 py-2"></th>
+                  <th className="px-2 py-3 w-40"></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-sm">
                 {Array.from({ length: game.totalRounds }, (_, i) => i + 1).map(
                   (n) => {
                     const r = rounds.find((rr) => rr.roundNumber === n);
@@ -78,26 +114,69 @@ export default function Dashboard() {
                     return (
                       <tr
                         key={n}
-                        className={n === game.currentRound ? 'bg-accent/10' : ''}
+                        className={`${
+                          n === game.currentRound ? 'bg-accent/10' : 'odd:bg-whiteA-2'
+                        }`}
                       >
-                        <td
-                          className="px-3 py-2 cursor-pointer hover:underline"
-                          onClick={() => goToRound(n)}
-                          title="Voir/éditer les résultats"
-                        >
+                        <td className="px-3 py-3 align-top font-medium">
                           {n}
                         </td>
-                        {game.players.map((p) => (
-                          <td
-                            key={p.id}
-                            className="px-2 py-2 cursor-pointer"
-                            onClick={() => goToRound(n)}
-                            title="Voir/éditer les résultats"
-                          >
-                            {r?.results[p.id]?.score ?? ''}
-                          </td>
-                        ))}
-                        <td className="px-2 py-2">
+                        {game.players.map((p) => {
+                          const d = cellData(n, p.id);
+                          const bonus = d.bonus ?? 0;
+                          const score = d.score;
+                          return (
+                            <td key={p.id} className="px-2 py-2 align-top">
+                              {d.bid !== undefined ? (
+                                <div className="space-y-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="inline-block rounded-full bg-surface/70 px-2 py-0.5">
+                                      Pari:
+                                      <span className="font-mono ml-1">
+                                        {d.bid}
+                                      </span>
+                                      {d.harry ? (
+                                        <span className="font-mono ml-1 opacity-80">
+                                          ({d.harry > 0 ? '+1' : '-1'})
+                                        </span>
+                                      ) : null}
+                                    </span>
+                                    <span className="inline-block rounded-full bg-surface/70 px-2 py-0.5">
+                                      Plis:
+                                      <span className="font-mono ml-1">
+                                        {d.tricks ?? '—'}
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="inline-block rounded-full bg-surface/70 px-2 py-0.5">
+                                      Bonus:
+                                      <span className="font-mono ml-1">
+                                        {bonus > 0 ? `+${bonus}` : bonus}
+                                      </span>
+                                    </span>
+                                    <span
+                                      className={`inline-block rounded-full px-2 py-0.5 font-mono ${
+                                        (score ?? 0) >= 0
+                                          ? 'bg-emerald-800/50 text-emerald-100'
+                                          : 'bg-rose-800/50 text-rose-100'
+                                      }`}
+                                    >
+                                      {score !== undefined
+                                        ? score >= 0
+                                          ? `+${score}`
+                                          : score
+                                        : '—'}
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="opacity-50">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                        <td className="px-2 py-2 align-top">
                           <div className="flex gap-2">
                             {locked ? (
                               <>
@@ -146,10 +225,10 @@ export default function Dashboard() {
                     );
                   }
                 )}
-                <tr className="border-t border-white/10 bg-white/5">
-                  <td className="px-3 py-2 font-semibold">Total</td>
+                <tr className="border-t border-whiteA-5 bg-whiteA-5">
+                  <td className="px-3 py-3 font-semibold">Total</td>
                   {game.players.map((p) => (
-                    <td key={p.id} className="px-2 py-2 font-semibold">
+                    <td key={p.id} className="px-2 py-3 font-semibold font-mono">
                       {totals[p.id]}
                     </td>
                   ))}

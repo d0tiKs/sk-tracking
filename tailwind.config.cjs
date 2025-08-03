@@ -8,7 +8,11 @@ module.exports = {
         accent: '#3a86ff',
         text: '#e6e9ef',
         ok: '#3ddc97',
-        bad: '#ef476f'
+        bad: '#ef476f',
+        whiteA: {
+          2: 'rgba(255,255,255,0.02)',
+          5: 'rgba(255,255,255,0.05)'
+        }
       }
     }
   },
