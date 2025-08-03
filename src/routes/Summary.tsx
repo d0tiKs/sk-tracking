@@ -1,7 +1,9 @@
+import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
 import { useStore } from '../store/useStore';
+import { exportCSV, exportXLSX } from '../lib/export';
 
 type PlayerRoundView = {
   bid?: number;
@@ -11,13 +13,13 @@ type PlayerRoundView = {
   score?: number;
 };
 
-export default function Dashboard() {
+export default function Summary() {
   const { gameId } = useParams();
   const nav = useNavigate();
   const { game, rounds } = useGame(gameId);
   const { unlockRound } = useStore();
 
-  if (!game) return null;
+if (!game) return <Layout title="Chargement">Chargement…</Layout>;
 
   // Totals
   const totals: Record<string, number> = {};
@@ -39,7 +41,6 @@ export default function Dashboard() {
   const rankIcon = (i: number) =>
     i === 0 ? '👑' : i === 1 ? '🏴‍☠️' : i === 2 ? '🧜‍♀️' : i === 3 ? '👶' : '';
 
-  // Helper to render a player’s view for a round
   const cellData = (roundNumber: number, playerId: string): PlayerRoundView => {
     const r = rounds.find((rr) => rr.roundNumber === roundNumber);
     if (!r) return {};
@@ -58,9 +59,31 @@ export default function Dashboard() {
   const goToRound = (n: number) => nav(`/game/${game.id}/round/${n}/results`);
   const goToBids = (n: number) => nav(`/game/${game.id}/round/${n}/bets`);
 
+  const doCSV = () => {
+    const blob = exportCSV(game, rounds);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `skullking_${game.id}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const doXLSX = () => {
+    const blob = exportXLSX(game, rounds);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `skullking_${game.id}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const isCompleted = game.status === 'completed';
+
   return (
     <Layout
-      title="Tableau de bord"
+      title="Résumé"
       right={
         <Link
           className="btn btn-ghost"
@@ -71,19 +94,34 @@ export default function Dashboard() {
       }
     >
       <div className="space-y-4">
-        {/* Current ranking with icons */}
+        {/* Ranking + exports when completed */}
         <div className="card p-4">
           <div className="text-lg font-semibold mb-2">Classement actuel</div>
           <ol className="space-y-1">
             {ranking.map((p, i) => (
               <li key={p.id} className="flex items-center justify-between">
                 <span>
-                  {i + 1}.<span className="ml-1">{rankIcon(i)}</span> {p.name} 
+                  {i + 1}. {p.name} <span className="ml-1">{rankIcon(i)}</span>
                 </span>
                 <span className="font-medium tabular-nums">{p.total}</span>
               </li>
             ))}
           </ol>
+
+          {isCompleted ? (
+            <div className="flex gap-2 mt-4">
+              <button className="btn btn-primary" onClick={doCSV}>
+                Exporter CSV
+              </button>
+              <button className="btn btn-ghost" onClick={doXLSX}>
+                Exporter Excel
+              </button>
+            </div>
+          ) : (
+            <div className="mt-3 text-sm opacity-80">
+              Partie en cours — Manche {game.currentRound}/{game.totalRounds}
+            </div>
+          )}
         </div>
 
         {/* Per-round detailed table */}
