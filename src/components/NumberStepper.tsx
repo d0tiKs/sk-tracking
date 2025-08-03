@@ -11,15 +11,22 @@ export default function NumberStepper({
   max?: number;
   onChange: (v: number) => void;
 }) {
-  const dec = () => onChange(Math.max(min, value - 1));
-  const inc = () => onChange(Math.min(max, value + 1));
+  const vibrate = () => {
+    try {
+      navigator.vibrate?.(10);
+    } catch {}
+  };
+  const dec = () => {
+    onChange(Math.max(min, value - 1));
+    vibrate();
+  };
+  const inc = () => {
+    onChange(Math.min(max, value + 1));
+    vibrate();
+  };
   return (
     <div className="inline-flex items-center gap-2">
-      <button
-        className="btn btn-ghost px-3 py-2"
-        onClick={dec}
-        aria-label="decrease"
-      >
+      <button className="btn btn-ghost px-3 py-2" onClick={dec} aria-label="decrease">
         −
       </button>
       <input
@@ -32,11 +39,7 @@ export default function NumberStepper({
         }
         className={clsx('input w-16 text-center')}
       />
-      <button
-        className="btn btn-ghost px-3 py-2"
-        onClick={inc}
-        aria-label="increase"
-      >
+      <button className="btn btn-ghost px-3 py-2" onClick={inc} aria-label="increase">
         +
       </button>
     </div>

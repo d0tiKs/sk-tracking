@@ -14,7 +14,10 @@ export default function Bets() {
   const { upsertRound } = useStore();
   const rNum = Number(roundNumber);
 
-  const round = useMemo<Round | undefined>(() => rounds.find((r) => r.roundNumber === rNum), [rounds, rNum]);
+  const round = useMemo<Round | undefined>(
+    () => rounds.find((r) => r.roundNumber === rNum),
+    [rounds, rNum]
+  );
   const [bids, setBids] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -33,18 +36,19 @@ export default function Bets() {
 
   if (!game) return null;
 
-  const maxBid = rNum; // standard: up to round number
+  const maxBid = rNum;
   const totalTricks = rNum;
 
   const saveAndNext = async () => {
-    const newRound: Round = round ?? {
-      id: uid(),
-      gameId: game.id,
-      roundNumber: rNum,
-      bids: {},
-      results: {},
-      locked: false
-    };
+    const newRound: Round =
+      round ?? {
+        id: uid(),
+        gameId: game.id,
+        roundNumber: rNum,
+        bids: {},
+        results: {},
+        locked: false
+      };
     for (const p of game.players) {
       newRound.bids[p.id] = {
         playerId: p.id,
@@ -65,13 +69,33 @@ export default function Bets() {
   const sumBids = Object.values(bids).reduce((a, b) => a + b, 0);
 
   return (
-    <Layout title={`Manche ${rNum}: Paris`}>
+    <Layout
+      title={`Manche ${rNum} · Paris`}
+      right={
+        <Link className="btn btn-ghost" to={`/game/${game.id}/dashboard`}>
+          Tableau
+        </Link>
+      }
+    >
       <div className="space-y-4">
-        <div className="opacity-80">Plis possibles: {totalTricks}</div>
+        <div className="flex items-center gap-3">
+          <span className="badge badge-ok">Plis: {totalTricks}</span>
+          <span
+            className={`badge ${
+              sumBids === totalTricks ? 'badge-ok' : 'badge-bad'
+            }`}
+          >
+            Total paris: {sumBids}
+          </span>
+        </div>
+
         <ul className="space-y-3">
           {game.players.map((p) => (
-            <li key={p.id} className="p-3 rounded bg-surface flex items-center justify-between">
-              <span>{p.name}</span>
+            <li
+              key={p.id}
+              className="card p-4 flex items-center justify-between"
+            >
+              <span className="font-medium">{p.name}</span>
               <NumberStepper
                 value={bids[p.id] ?? 0}
                 min={0}
@@ -81,12 +105,11 @@ export default function Bets() {
             </li>
           ))}
         </ul>
-        <div className="flex items-center justify-between">
-          <span>Total des paris: {sumBids}</span>
-          <div className="flex gap-2">
-            <Link className="px-3 py-2 rounded bg-surface" to={`/game/${game.id}/dashboard`}>Tableau</Link>
-            <button className="px-4 py-2 rounded bg-accent" onClick={saveAndNext}>Valider</button>
-          </div>
+
+        <div className="flex items-center justify-end gap-2">
+          <button className="btn btn-primary" onClick={saveAndNext}>
+            Valider les paris
+          </button>
         </div>
       </div>
     </Layout>

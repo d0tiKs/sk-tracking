@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 html,
@@ -18,3 +18,41 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Helpers */
+.container-app {
+  @apply max-w-screen-sm mx-auto px-3 sm:px-4;
+}
+
+.card {
+  @apply rounded-xl bg-surface/90 border border-white/5 shadow-lg;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors;
+}
+.btn-primary {
+  @apply bg-accent hover:bg-accent/90 text-white;
+}
+.btn-ghost {
+  @apply bg-surface hover:bg-surface/80;
+}
+.btn-danger {
+  @apply bg-red-700 hover:bg-red-600 text-white;
+}
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+}
+.badge-ok {
+  @apply bg-emerald-700/50 text-emerald-200;
+}
+.badge-bad {
+  @apply bg-rose-700/50 text-rose-200;
+}
+.input {
+  @apply rounded-lg bg-surface/80 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/50;
+}
+.section-title {
+  @apply text-sm uppercase tracking-widest text-white/70;
+}

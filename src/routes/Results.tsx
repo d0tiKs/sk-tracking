@@ -7,7 +7,6 @@ import CardCounter from '../components/CardCounter';
 import { presets } from '../config/scoringConfig';
 import { computeBonusFromSpecials, calculateScore } from '../lib/score';
 import { Round } from '../types';
-import { uid } from '../lib/utils';
 import { useStore } from '../store/useStore';
 
 export default function Results() {
@@ -18,7 +17,10 @@ export default function Results() {
   const rNum = Number(roundNumber);
   const config = presets.standard;
 
-  const round = useMemo<Round | undefined>(() => rounds.find((r) => r.roundNumber === rNum), [rounds, rNum]);
+  const round = useMemo<Round | undefined>(
+    () => rounds.find((r) => r.roundNumber === rNum),
+    [rounds, rNum]
+  );
 
   const [local, setLocal] = useState(() => {
     if (!game) return {};
@@ -50,8 +52,15 @@ export default function Results() {
       const pid = p.id;
       const entry = (local as any)[pid];
       const specialsBonus = computeBonusFromSpecials(entry.specials, config);
-      const adjustedBid = entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
-      const score = calculateScore(adjustedBid, entry.tricks, rNum, entry.bonus + specialsBonus, config);
+      const adjustedBid =
+        entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
+      const score = calculateScore(
+        adjustedBid,
+        entry.tricks,
+        rNum,
+        entry.bonus + specialsBonus,
+        config
+      );
 
       updated.bids[pid] = {
         playerId: pid,
@@ -78,89 +87,163 @@ export default function Results() {
   };
 
   return (
-    <Layout title={`Résultats manche ${rNum}`}>
+    <Layout title={`Résultats · Manche ${rNum}`}>
       <div className="space-y-6">
         {game.players.map((p) => {
           const entry = (local as any)[p.id];
           const specialsBonus = computeBonusFromSpecials(entry.specials, config);
-          const adjustedBid = entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
-          const projected = calculateScore(adjustedBid, entry.tricks, rNum, entry.bonus + specialsBonus, config);
+          const adjustedBid =
+            entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
+          const projected = calculateScore(
+            adjustedBid,
+            entry.tricks,
+            rNum,
+            entry.bonus + specialsBonus,
+            config
+          );
 
           return (
-            <div key={p.id} className="rounded bg-surface p-3 space-y-3">
+            <div key={p.id} className="card p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold">{p.name}</h4>
-                <div className="opacity-70">Pari: {entry.bid} {entry.harry ? `(Harry ${entry.harry > 0 ? '+1' : '-1'})` : ''}</div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span>Plis réalisés</span>
-                <NumberStepper value={entry.tricks} min={0} max={rNum} onChange={(v) => setPlayer(p.id, 'tricks', v)} />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span>Harry The Giant (ajustement pari)</span>
-                <div className="flex items-center gap-2">
-                  <button className={`px-3 py-1 rounded ${entry.harry === -1 ? 'bg-accent' : 'bg-surface'}`} onClick={() => setPlayer(p.id, 'harry', -1)}>-1</button>
-                  <button className={`px-3 py-1 rounded ${entry.harry === 0 ? 'bg-accent' : 'bg-surface'}`} onClick={() => setPlayer(p.id, 'harry', 0)}>0</button>
-                  <button className={`px-3 py-1 rounded ${entry.harry === 1 ? 'bg-accent' : 'bg-surface'}`} onClick={() => setPlayer(p.id, 'harry', 1)}>+1</button>
+                <h4 className="font-semibold text-lg">{p.name}</h4>
+                <div className="opacity-80">
+                  Pari: {entry.bid}{' '}
+                  {entry.harry
+                    ? `(Harry ${entry.harry > 0 ? '+1' : '-1'})`
+                    : ''}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span>Bonus (+10 / -10)</span>
-                <div className="flex items-center gap-2">
-                  <button className="px-3 py-1 rounded bg-surface" onClick={() => setPlayer(p.id, 'bonus', entry.bonus - 10)}>-10</button>
-                  <span>{entry.bonus}</span>
-                  <button className="px-3 py-1 rounded bg-surface" onClick={() => setPlayer(p.id, 'bonus', entry.bonus + 10)}>+10</button>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center justify-between">
+                  <span>Plis réalisés</span>
+                  <NumberStepper
+                    value={entry.tricks}
+                    min={0}
+                    max={rNum}
+                    onChange={(v) => setPlayer(p.id, 'tricks', v)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span>Harry The Giant (ajustement pari)</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className={`btn btn-ghost ${
+                        entry.harry === -1 ? 'ring-2 ring-accent/50' : ''
+                      }`}
+                      onClick={() => setPlayer(p.id, 'harry', -1)}
+                    >
+                      −1
+                    </button>
+                    <button
+                      className={`btn btn-ghost ${
+                        entry.harry === 0 ? 'ring-2 ring-accent/50' : ''
+                      }`}
+                      onClick={() => setPlayer(p.id, 'harry', 0)}
+                    >
+                      0
+                    </button>
+                    <button
+                      className={`btn btn-ghost ${
+                        entry.harry === 1 ? 'ring-2 ring-accent/50' : ''
+                      }`}
+                      onClick={() => setPlayer(p.id, 'harry', 1)}
+                    >
+                      +1
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span>Bonus (+10 / -10)</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setPlayer(p.id, 'bonus', entry.bonus - 10)}
+                    >
+                      −10
+                    </button>
+                    <span className="w-12 text-center tabular-nums">
+                      {entry.bonus}
+                    </span>
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setPlayer(p.id, 'bonus', entry.bonus + 10)}
+                    >
+                      +10
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <CardCounter
-                  icon="💀👑"
-                  label="Skull King"
-                  value={entry.specials.skullKing ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, skullKing: v })
-                  }
-                />
-                <CardCounter
-                  icon="🏴‍☠️"
-                  label="Pirate"
-                  value={entry.specials.pirates ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, pirates: v })
-                  }
-                />
-                <CardCounter
-                  icon="🧜‍♀️"
-                  label="Sirène"
-                  value={entry.specials.mermaids ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, mermaids: v })
-                  }
-                />
-                <CardCounter
-                  icon="🪙"
-                  label="Pièce"
-                  value={entry.specials.coins ?? 0}
-                  onChange={(v) =>
-                    setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
-                  }
-                />
+                <div className="section-title">Cartes spéciales</div>
+                <div className="grid grid-cols-1 gap-2">
+                  <CardCounter
+                    icon="💀👑"
+                    label="Skull King"
+                    value={entry.specials.skullKing ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', {
+                        ...entry.specials,
+                        skullKing: v
+                      })
+                    }
+                  />
+                  <CardCounter
+                    icon="🏴‍☠️"
+                    label="Pirate"
+                    value={entry.specials.pirates ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', {
+                        ...entry.specials,
+                        pirates: v
+                      })
+                    }
+                  />
+                  <CardCounter
+                    icon="🧜‍♀️"
+                    label="Sirène"
+                    value={entry.specials.mermaids ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', {
+                        ...entry.specials,
+                        mermaids: v
+                      })
+                    }
+                  />
+                  <CardCounter
+                    icon="🪙"
+                    label="Pièce"
+                    value={entry.specials.coins ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
+                    }
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-accent/40">
-                <span>Score projeté</span>
-                <span className={projected >= 0 ? 'text-green-400' : 'text-red-400'}>{projected}</span>
+              <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                <span className="opacity-80">Score projeté</span>
+                <span
+                  className={
+                    projected >= 0
+                      ? 'text-green-400 font-semibold'
+                      : 'text-red-400 font-semibold'
+                  }
+                >
+                  {projected >= 0 ? `+${projected}` : projected}
+                </span>
               </div>
             </div>
           );
         })}
 
         <div className="flex justify-end">
-          <button className="px-4 py-2 rounded bg-accent" onClick={saveRound}>Valider la manche</button>
+          <button className="btn btn-primary" onClick={saveRound}>
+            Valider la manche
+          </button>
         </div>
       </div>
     </Layout>

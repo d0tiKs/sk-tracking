@@ -17,46 +17,60 @@ export default function Dashboard() {
   }
 
   return (
-    <Layout title="Tableau de bord">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr>
-              <th>Manche</th>
-              {game.players.map((p) => (
-                <th key={p.id} className="px-2">{p.name}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: game.totalRounds }, (_, i) => i + 1).map((n) => {
-              const r = rounds.find((rr) => rr.roundNumber === n);
-              return (
-                <tr key={n} className={n === game.currentRound ? 'bg-accent/20' : ''}>
-                  <td className="px-2 py-1">{n}</td>
-                  {game.players.map((p) => (
-                    <td key={p.id} className="px-2 py-1">
-                      {r?.results[p.id]?.score ?? ''}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-            <tr className="border-t border-accent/40">
-              <td className="px-2 py-1 font-semibold">Total</td>
-              {game.players.map((p) => (
-                <td key={p.id} className="px-2 py-1 font-semibold">
-                  {totals[p.id]}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div className="mt-4">
-        <Link className="px-3 py-2 rounded bg-surface" to={`/game/${game.id}/round/${game.currentRound}/bets`}>
+    <Layout
+      title="Tableau de bord"
+      right={
+        <Link
+          className="btn btn-ghost"
+          to={`/game/${game.id}/round/${game.currentRound}/bets`}
+        >
           Retour
         </Link>
+      }
+    >
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-white/5">
+              <tr>
+                <th className="px-3 py-2">Manche</th>
+                {game.players.map((p) => (
+                  <th key={p.id} className="px-2 py-2">
+                    {p.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: game.totalRounds }, (_, i) => i + 1).map(
+                (n) => {
+                  const r = rounds.find((rr) => rr.roundNumber === n);
+                  return (
+                    <tr
+                      key={n}
+                      className={n === game.currentRound ? 'bg-accent/10' : ''}
+                    >
+                      <td className="px-3 py-2">{n}</td>
+                      {game.players.map((p) => (
+                        <td key={p.id} className="px-2 py-2">
+                          {r?.results[p.id]?.score ?? ''}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                }
+              )}
+              <tr className="border-t border-white/10 bg-white/5">
+                <td className="px-3 py-2 font-semibold">Total</td>
+                {game.players.map((p) => (
+                  <td key={p.id} className="px-2 py-2 font-semibold">
+                    {totals[p.id]}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </Layout>
   );

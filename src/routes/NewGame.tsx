@@ -16,17 +16,13 @@ export default function NewGame() {
   ]);
 
   const addPlayer = () =>
-    setPlayers((ps) => [
-      ...ps,
-      { id: uid(), name: `Joueur ${ps.length + 1}` }
-    ]);
+    setPlayers((ps) => [...ps, { id: uid(), name: `Joueur ${ps.length + 1}` }]);
   const removePlayer = (id: string) =>
     setPlayers((ps) => ps.filter((p) => p.id !== id));
   const updateName = (id: string, name: string) =>
     setPlayers((ps) => ps.map((p) => (p.id === id ? { ...p, name } : p)));
 
-  const canStart =
-    players.length >= 2 && players.length <= 10 && rounds >= 1;
+  const canStart = players.length >= 2 && players.length <= 10 && rounds >= 1;
 
   const start = async () => {
     const gameId = await createGame({
