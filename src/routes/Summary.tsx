@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
 import { useStore } from '../store/useStore';
 import { exportCSV, exportXLSX } from '../lib/export';
+import { formatDate } from '../lib/utils';
 
 type PlayerRoundView = {
   bid?: number;
@@ -20,6 +21,12 @@ export default function Summary() {
   const { unlockRound } = useStore();
 
 if (!game) return <Layout title="Chargement">Chargement…</Layout>;
+
+  // Show date if available
+  const gameDate = game.date || (game.createdAt ? formatDate(game.createdAt) : '');
+  
+  // Display date in header
+  const displayDate = gameDate ? ` - ${gameDate}` : '';
 
   // Totals
   const totals: Record<string, number> = {};
@@ -83,7 +90,7 @@ if (!game) return <Layout title="Chargement">Chargement…</Layout>;
 
   return (
     <Layout
-      title="Résumé"
+      title={`Résumé${displayDate}`}
       right={
         <Link
           className="btn btn-ghost"

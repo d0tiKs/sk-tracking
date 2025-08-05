@@ -1,6 +1,7 @@
 import { Game, Round } from '../types';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import { formatDate } from '../lib/utils';
 
 export function exportCSV(game: Game, rounds: Round[]) {
   const rows: any[] = [];
@@ -10,6 +11,7 @@ export function exportCSV(game: Game, rounds: Round[]) {
       const adj = r.bids[playerId]?.betAdjustedByHarry ?? 0;
       rows.push({
         gameId: game.id,
+        date: game.date || formatDate(game.createdAt),
         round: r.roundNumber,
         playerId,
         bid,
@@ -37,6 +39,7 @@ export function exportXLSX(game: Game, rounds: Round[]) {
       const adj = r.bids[playerId]?.betAdjustedByHarry ?? 0;
       rows.push({
         Round: r.roundNumber,
+        Date: game.date || formatDate(game.createdAt),
         PlayerId: playerId,
         Bid: bid,
         AdjustedBid: bid + adj,

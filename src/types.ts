@@ -19,6 +19,7 @@ export interface Game {
   currentRound: number;
   scoringPresetId: string;
   notes?: string;
+  date?: string;
 }
 
 export interface RoundBid {

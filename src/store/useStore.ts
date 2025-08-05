@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { db } from '../lib/db';
 import { Game, Round, UUID } from '../types';
-import { uid } from '../lib/utils';
+import { uid, formatDate } from '../lib/utils';
 
 interface StoreState {
   games: Game[];
@@ -39,7 +39,8 @@ export const useStore = create<StoreState>((set, get) => ({
       players: partial.players,
       totalRounds: partial.totalRounds,
       currentRound: 1,
-      scoringPresetId: partial.scoringPresetId
+      scoringPresetId: partial.scoringPresetId,
+      date: formatDate(Date.now())
     };
     await db.games.add(game);
     await get().loadGames();
