@@ -233,7 +233,7 @@ export default function Results() {
                     }
                   />
                   <CardCounter
-                    icon="🥈"
+                    icon="🦜"
                     label="Second"
                     value={entry.specials.second ?? 0}
                     onChange={(v) =>
