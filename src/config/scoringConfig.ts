@@ -18,11 +18,12 @@ export interface ScoringConfig {
 export const standardScoring: ScoringConfig = {
   pointsPerSuccessfulTrick: 20,
   failedBidPenaltyPerTrick: 10,
-  zeroBidMultiplier: 20,
+  zeroBidMultiplier: 10,
   zeroBidFailMultiplier: 10,
   allowHarryAdjustment: true,
   specials: {
     skullKing: { id: 'skullKing', icon: '💀👑', label: 'Skull King' },
+    second: { id: 'second', icon: '🦜', label: 'Second' },
     pirates: { id: 'pirates', icon: '🏴‍☠️', label: 'Pirate' },
     mermaids: { id: 'mermaids', icon: '🧜‍♀️', label: 'Mermaid' },
     coins: { id: 'coins', icon: '🪙', label: 'Coin', points: 10 }

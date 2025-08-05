@@ -233,6 +233,17 @@ export default function Results() {
                     }
                   />
                   <CardCounter
+                    icon="🥈"
+                    label="Second"
+                    value={entry.specials.second ?? 0}
+                    onChange={(v) =>
+                      setPlayer(p.id, 'specials', {
+                        ...entry.specials,
+                        second: v
+                      })
+                    }
+                  />
+                  <CardCounter
                     icon="🏴‍☠️"
                     label="Pirate"
                     value={entry.specials.pirates ?? 0}

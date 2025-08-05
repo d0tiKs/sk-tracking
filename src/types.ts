@@ -32,6 +32,7 @@ export interface RoundResultPerPlayer {
   bonus: number;
   specialCards: {
     skullKing?: number;
+    second?: number;
     pirates?: number;
     mermaids?: number;
     coins?: number;
