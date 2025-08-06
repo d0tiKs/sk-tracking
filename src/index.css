@@ -22,7 +22,7 @@ body {
 
 /* Helpers */
 .container-app {
-  @apply max-w-screen-sm mx-auto px-3 sm:px-4;
+  @apply max-w-full mx-auto px-3 sm:px-4;
 }
 
 .card {
