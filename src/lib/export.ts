@@ -9,10 +9,16 @@ export function exportCSV(game: Game, rounds: Round[]) {
     for (const [playerId, res] of Object.entries(r.results)) {
       const bid = r.bids[playerId]?.bid ?? 0;
       const adj = r.bids[playerId]?.betAdjustedByHarry ?? 0;
+      
+      // Find player name by ID
+      const player = game.players.find(p => p.id === playerId);
+      const playerName = player ? player.name : playerId; // fallback to ID if not found
+      
       rows.push({
         gameId: game.id,
         date: game.date || formatDate(game.createdAt),
         round: r.roundNumber,
+        playerName,
         playerId,
         bid,
         adjustedBid: bid + adj,
@@ -37,9 +43,15 @@ export function exportXLSX(game: Game, rounds: Round[]) {
     for (const [playerId, res] of Object.entries(r.results)) {
       const bid = r.bids[playerId]?.bid ?? 0;
       const adj = r.bids[playerId]?.betAdjustedByHarry ?? 0;
+      
+      // Find player name by ID
+      const player = game.players.find(p => p.id === playerId);
+      const playerName = player ? player.name : playerId; // fallback to ID if not found
+      
       rows.push({
         Round: r.roundNumber,
         Date: game.date || formatDate(game.createdAt),
+        PlayerName: playerName,
         PlayerId: playerId,
         Bid: bid,
         AdjustedBid: bid + adj,
