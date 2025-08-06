@@ -51,6 +51,15 @@ export default function Results() {
     return o;
   });
 
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
+    const o: Record<string, boolean> = {};
+    for (const p of game.players) {
+      // Default to collapsed (hidden) for all players
+      o[p.id] = true;
+    }
+    return o;
+  });
+
   const setPlayer = (pid: string, key: string, value: any) =>
     setLocal((s) => ({ ...s, [pid]: { ...s[pid], [key]: value } }));
 
@@ -214,63 +223,77 @@ export default function Results() {
               </div>
 
               <div className="space-y-2">
-                <div className="section-title">
-                  Historique des cartes spéciales
+                <div
+                  className="section-title flex items-center justify-between cursor-pointer p-2 rounded-lg bg-surface/30 hover:bg-surface/50 transition-colors"
+                  onClick={() => {
+                    setCollapsedSections(prev => ({
+                      ...prev,
+                      [p.id]: !prev[p.id]
+                    }));
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{collapsedSections[p.id] ? '▶' : '▼'}</span>
+                    <span>Cartes spéciales</span>
+                  </div>
+                  <span className="text-sm opacity-75">Cliquez pour {collapsedSections[p.id] ? 'ouvrir' : 'fermer'}</span>
                 </div>
-                <div className="grid grid-cols-1 gap-2">
-                  <CardCounter
-                    icon="💀👑"
-                    label="Skull King"
-                    value={entry.specials.skullKing ?? 0}
-                    onChange={(v) =>
-                      setPlayer(p.id, 'specials', {
-                        ...entry.specials,
-                        skullKing: v
-                      })
-                    }
-                  />
-                  <CardCounter
-                    icon="🦜"
-                    label="Second"
-                    value={entry.specials.second ?? 0}
-                    onChange={(v) =>
-                      setPlayer(p.id, 'specials', {
-                        ...entry.specials,
-                        second: v
-                      })
-                    }
-                  />
-                  <CardCounter
-                    icon="🏴‍☠️"
-                    label="Pirate"
-                    value={entry.specials.pirates ?? 0}
-                    onChange={(v) =>
-                      setPlayer(p.id, 'specials', {
-                        ...entry.specials,
-                        pirates: v
-                      })
-                    }
-                  />
-                  <CardCounter
-                    icon="🧜‍♀️"
-                    label="Sirène"
-                    value={entry.specials.mermaids ?? 0}
-                    onChange={(v) =>
-                      setPlayer(p.id, 'specials', {
-                        ...entry.specials,
-                        mermaids: v
-                      })
-                    }
-                  />
-                  <CardCounter
-                    icon="🪙"
-                    label="Pièce"
-                    value={entry.specials.coins ?? 0}
-                    onChange={(v) =>
-                      setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
-                    }
-                  />
-                </div>
+                {!collapsedSections[p.id] && (
+                  <div className="grid grid-cols-1 gap-2 p-2">
+                    <CardCounter
+                      icon="💀👑"
+                      label="Skull King"
+                      value={entry.specials.skullKing ?? 0}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', {
+                          ...entry.specials,
+                          skullKing: v
+                        })
+                      }
+                    />
+                    <CardCounter
+                      icon="🦜"
+                      label="Second"
+                      value={entry.specials.second ?? 0}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', {
+                          ...entry.specials,
+                          second: v
+                        })
+                      }
+                    />
+                    <CardCounter
+                      icon="🏴‍☠️"
+                      label="Pirate"
+                      value={entry.specials.pirates ?? 0}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', {
+                          ...entry.specials,
+                          pirates: v
+                        })
+                      }
+                    />
+                    <CardCounter
+                      icon="🧜‍♀️"
+                      label="Sirène"
+                      value={entry.specials.mermaids ?? 0}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', {
+                          ...entry.specials,
+                          mermaids: v
+                        })
+                      }
+                    />
+                    <CardCounter
+                      icon="🪙"
+                      label="Pièce"
+                      value={entry.specials.coins ?? 0}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
+                      }
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-white/10">
