@@ -40,6 +40,26 @@ if (!game) return <Layout title="Chargement">Chargement…</Layout>;
     }
   }
 
+  // Accumulated scores
+  const accumulatedScores: Record<string, number[]> = {};
+  for (const p of game.players) {
+    accumulatedScores[p.id] = [];
+  }
+  
+  for (let i = 0; i < game.totalRounds; i++) {
+    const roundNumber = i + 1;
+    for (const p of game.players) {
+      const r = rounds.find((rr) => rr.roundNumber === roundNumber);
+      if (!r) {
+        accumulatedScores[p.id].push(accumulatedScores[p.id][i-1] || 0);
+      } else {
+        const score = r.results[p.id]?.score ?? 0;
+        const prevScore = accumulatedScores[p.id][i-1] || 0;
+        accumulatedScores[p.id].push(prevScore + score);
+      }
+    }
+  }
+
   // Ranking
   const ranking = [...game.players]
     .map((p) => ({ ...p, total: totals[p.id] ?? 0 }))
@@ -170,6 +190,7 @@ if (!game) return <Layout title="Chargement">Chargement…</Layout>;
                           const d = cellData(n, p.id);
                           const bonus = d.bonus ?? 0;
                           const score = d.score;
+                          const accumulatedScore = accumulatedScores[p.id][n - 1];
                           return (
                             <td key={p.id} className="px-2 py-2 align-top">
                               {d.bid !== undefined ? (
@@ -212,6 +233,16 @@ if (!game) return <Layout title="Chargement">Chargement…</Layout>;
                                           ? `+${score}`
                                           : score
                                         : '—'}
+                                    </span>
+                                  </div>
+                                  <div className="mt-1">
+                                    <span className="text-xs opacity-70">Cumulé:</span>{' '}
+                                    <span className={`font-mono ${
+                                      accumulatedScore >= 0
+                                        ? 'text-emerald-600'
+                                        : 'text-rose-600'
+                                    }`}>
+                                      {accumulatedScore >= 0 ? `+${accumulatedScore}` : accumulatedScore}
                                     </span>
                                   </div>
                                 </div>
