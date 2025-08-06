@@ -5,18 +5,27 @@ import NumberStepper from '../components/NumberStepper';
 import { Player } from '../types';
 import { uid } from '../lib/utils';
 import { useStore } from '../store/useStore';
+import PlayerNameCombobox from '../components/PlayerNameCombobox';
 
 export default function NewGame() {
   const nav = useNavigate();
   const { createGame } = useStore();
   const [rounds, setRounds] = useState(10);
   const [players, setPlayers] = useState<Player[]>([
-    { id: uid(), name: 'Joueur 1' },
-    { id: uid(), name: 'Joueur 2' }
+    { id: uid(), name: 'Player 1' },
+    { id: uid(), name: 'Player 2' }
   ]);
+  const [playerName, setPlayerName] = useState('');
 
-  const addPlayer = () =>
-    setPlayers((ps) => [...ps, { id: uid(), name: `Joueur ${ps.length + 1}` }]);
+  const addPlayer = (name: string = '') => {
+    const playerName = name || `Player ${players.length + 1}`;
+    // Check for duplicate names before adding
+    const isDuplicate = players.some(p => p.name.trim().toLowerCase() === playerName.trim().toLowerCase());
+    if (isDuplicate) return;
+    
+    setPlayers((ps) => [...ps, { id: uid(), name: playerName }]);
+    setPlayerName('');
+  };
   const removePlayer = (id: string) =>
     setPlayers((ps) => ps.filter((p) => p.id !== id));
   const updateName = (id: string, name: string) =>
@@ -47,25 +56,25 @@ export default function NewGame() {
             {players.map((p, idx) => (
               <div key={p.id} className="flex items-center gap-2">
                 <span className="w-6 text-right opacity-70">{idx + 1}.</span>
-                <input
-                  className="input flex-1"
-                  value={p.name}
-                  onChange={(e) => updateName(p.id, e.target.value)}
-                  placeholder={`Joueur ${idx + 1}`}
-                />
-                {players.length > 2 && (
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => removePlayer(p.id)}
-                  >
-                    Retirer
-                  </button>
-                )}
+                <div className="flex-1">
+                  <PlayerNameCombobox
+                    value={p.name}
+                    onChange={(name) => updateName(p.id, name)}
+                    placeholder={`Player ${idx + 1}`}
+                    currentGamePlayers={players}
+                  />
+                </div>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => removePlayer(p.id)}
+                >
+                  Retirer
+                </button>
               </div>
             ))}
           </div>
           {players.length < 10 && (
-            <button className="btn btn-ghost mt-3" onClick={addPlayer}>
+            <button className="btn btn-ghost mt-3" onClick={() => addPlayer()}>
               Ajouter un joueur
             </button>
           )}
