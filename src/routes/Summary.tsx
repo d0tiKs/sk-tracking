@@ -128,7 +128,7 @@ if (!game) return <Layout title="Chargement">Chargement…</Layout>;
             {ranking.map((p, i) => (
               <li key={p.id} className="flex items-center justify-between">
                 <span>
-                  {i + 1}. {p.name} <span className="ml-1">{rankIcon(i)}</span>
+                  {i + 1}. <span className="ml-1">{rankIcon(i)}</span> {p.name}
                 </span>
                 <span className="font-medium tabular-nums">{p.total}</span>
               </li>
@@ -153,9 +153,9 @@ if (!game) return <Layout title="Chargement">Chargement…</Layout>;
 
         {/* Per-round detailed table */}
         <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[500px] relative">
             <table className="w-full text-left">
-              <thead className="bg-whiteA-5">
+              <thead className="bg-opacity-100 bg-surface sticky top-0 z-20 shadow-lg ">
                 <tr className="text-sm">
                   <th className="px-3 py-3 w-20">Manche</th>
                   {game.players.map((p) => (
