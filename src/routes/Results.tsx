@@ -43,7 +43,7 @@ export default function Results() {
       o[p.id] = {
         tricks: existing?.tricks ?? 0,
         bonus: existing?.bonus ?? 0,
-        harry: (adj as -1 | 0 | 1) ?? 0,
+        harry: adj ?? 0,
         specials: { ...(existing?.specialCards ?? {}) },
         bid
       };
@@ -148,7 +148,7 @@ export default function Results() {
                 <div className="opacity-80">
                   Pari: {entry.bid}{' '}
                   {entry.harry
-                    ? `(Harry ${entry.harry > 0 ? '+1' : '-1'})`
+                    ? `(Harry ${entry.harry > 0 ? '+' : ''}${entry.harry})`
                     : ''}
                 </div>
               </div>
@@ -168,26 +168,23 @@ export default function Results() {
                   <span>Harry The Giant (ajustement pari)</span>
                   <div className="flex items-center gap-2">
                     <button
-                      className={`btn btn-ghost ${
-                        entry.harry === -1 ? 'ring-2 ring-accent/50' : ''
-                      }`}
-                      onClick={() => setPlayer(p.id, 'harry', -1)}
+                      className="btn btn-ghost"
+                      onClick={() => {
+                        const newValue = Math.max(-2, entry.harry - 1);
+                        setPlayer(p.id, 'harry', newValue);
+                      }}
                     >
                       −1
                     </button>
+                    <span className="w-12 text-center tabular-nums font-semibold">
+                      {entry.harry}
+                    </span>
                     <button
-                      className={`btn btn-ghost ${
-                        entry.harry === 0 ? 'ring-2 ring-accent/50' : ''
-                      }`}
-                      onClick={() => setPlayer(p.id, 'harry', 0)}
-                    >
-                      0
-                    </button>
-                    <button
-                      className={`btn btn-ghost ${
-                        entry.harry === 1 ? 'ring-2 ring-accent/50' : ''
-                      }`}
-                      onClick={() => setPlayer(p.id, 'harry', 1)}
+                      className="btn btn-ghost"
+                      onClick={() => {
+                        const newValue = Math.min(2, entry.harry + 1);
+                        setPlayer(p.id, 'harry', newValue);
+                      }}
                     >
                       +1
                     </button>

@@ -25,7 +25,7 @@ export interface Game {
 export interface RoundBid {
   playerId: UUID;
   bid: number;
-  betAdjustedByHarry?: -1 | 0 | 1;
+  betAdjustedByHarry?: -2 | -1 | 0 | 1 | 2;
 }
 
 export interface RoundResultPerPlayer {
