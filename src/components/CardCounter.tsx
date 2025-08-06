@@ -24,7 +24,7 @@ export default function CardCounter({
         <button
           className="btn btn-ghost px-2 py-1"
           onClick={() => {
-            onChange(Math.max(0, value - 1));
+            onChange(value - 1);
             vibrate();
           }}
           aria-label={`remove ${label}`}
