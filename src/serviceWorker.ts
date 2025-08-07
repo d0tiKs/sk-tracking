@@ -1,19 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { registerSW } from 'virtual:pwa-register';
 import App from './App';
 import './index.css';
 
+// ✅ Import vite-plugin-pwa's virtual register helper
+import { registerSW } from 'virtual:pwa-register';
+
+// This will prompt the user when a new version is available
 const updateSW = registerSW({
-  immediate: true,
   onNeedRefresh() {
-    if (confirm('New version available. Reload?')) {
+    if (confirm('A new version is available. Reload now?')) {
       updateSW(true);
     }
   },
   onOfflineReady() {
-    console.log('App ready to work offline');
+    console.log('App is ready to work offline');
   }
 });
 
