@@ -20,6 +20,7 @@ const updateSW = registerSW({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
+    <BrowserRouter basename="/sk-tracking/"></BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>
