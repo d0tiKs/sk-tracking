@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "bunx vite build",
     "preview": "vite preview",
-    "deploy": "bun run build && gh-pages -d dist",
+    "deploy": "bunx vite build && bunx gh-pages -d dist -b gh-pages",
     "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
     "format": "prettier --write ."
   },
