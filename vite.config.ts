@@ -47,8 +47,8 @@ export default defineConfig({
       manifest: {
         name: 'Skull King Scorekeeper',
         short_name: 'SkullKing',
-        start_url: 'sk-tracking/',
-        scope: 'sk-tracking/',
+        start_url: '/sk-tracking/',
+        scope: '/sk-tracking/',
         display: 'standalone',
         display_override: ['standalone', 'browser'],
         background_color: '#0b132b',
