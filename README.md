@@ -21,6 +21,7 @@ Built with **React + TypeScript + Vite + Tailwind CSS**, it lets you **record bi
 - **CSV & Excel export** with all game details
 - **Mobile-friendly UI** with collapsible sections
 - **Duplicate name prevention** in player setup
+- **Randomized player order** with inline preview and confirmation before game start — improves mobile usability by replacing a modal with a streamlined inline preview, ensuring a smoother user experience during game setup.
 
 ---
 
@@ -33,12 +34,13 @@ Built with **React + TypeScript + Vite + Tailwind CSS**, it lets you **record bi
 ## 🎮 Quick Start (Players)
 
 1. **Open the app**: [d0tiks.github.io/sk-tracking](https://d0tiks.github.io/sk-tracking)
-2. **Install it** (optional):  
-   - On mobile: “Add to Home Screen” from your browser menu  
+2. **Install it** (optional):
+   - On mobile: “Add to Home Screen” from your browser menu
    - On desktop: Install via browser’s PWA prompt
 3. **Start a new game**:
    - Choose number of rounds (1–20)
    - Add 2–10 players (no duplicate names)
+   - **Randomize player order**: Enable the "Random Order" checkbox and click "Preview" to see a shuffled order. Confirm before starting to prevent accidental starts.
 4. **Bets phase**:
    - Enter each player’s bid for the round
    - Total bids are checked against total tricks
