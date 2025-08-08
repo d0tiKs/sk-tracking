@@ -12,8 +12,8 @@ export default function NewGame() {
   const { createGame } = useStore();
   const [rounds, setRounds] = useState(10);
   const [players, setPlayers] = useState<Player[]>([
-    { id: uid(), name: 'Player 1' },
-    { id: uid(), name: 'Player 2' }
+    { id: uid(), name: '' },
+    { id: uid(), name: '' }
   ]);
 
   const [randomizeOrder, setRandomizeOrder] = useState(false);
