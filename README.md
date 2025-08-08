@@ -1,133 +1,187 @@
-# 📓💀👑 Skull King Tracker Progressive Web App
-A lightweight, client-side tracking app for the Skull King card game built with React, TypeScript, Vite, and Tailwind CSS. It records bets, calculates scores, and helps you keep track of outcomes with a clean, responsive UI that works as a Progressive Web App.
+# 📓💀👑 Skull King Tracker — Progressive Web App
 
-GitHub Repository: https://github.com/d0tiKs/sk-tracking
-Deployed Version: https://d0tiks.github.io/sk-tracking/
+A **lightweight, offline-first** score tracker for the **Skull King** card game.  
+Built with **React + TypeScript + Vite + Tailwind CSS**, it lets you **record bids, results, and special cards**, calculate scores automatically (based on bids/tricks/bonus), and export your games — all in a **mobile-friendly PWA** you can install and use without internet.
 
-## Key Features
+**Live App:** [d0tiks.github.io/sk-tracking](https://d0tiks.github.io/sk-tracking)  
+**Source Code:** [github.com/d0tiKs/sk-tracking](https://github.com/d0tiKs/sk-tracking)
 
-- Complete game flow: New Game → Bets → Results → Summary
-- Automatic score calculation based on configurable rules
-- Client-side data storage using IndexedDB (via Dexie.js)
-- Export data to CSV for external analysis
-- Responsive design via Tailwind CSS
-- Progressive Web App capabilities (installable, offline support)
-- Built with a modern React Hook-first architecture and Zustand state management
+---
 
-## Project Structure
+## ✨ Features
+
+- **Full game flow**: New Game → Bets → Results → Summary
+- **Automatic score calculation** for bids/tricks/bonus
+- **Live projected score** while entering results
+- **Harry adjustment mechanic** (±2 bid tweak)
+- **Special card tracking** (Skull King, Second, Pirates, Mermaids, Coins) — *tracked only, no auto-scoring*
+- **Per-round cumulative score tracking**
+- **Editable past rounds** (unlock feature)
+- **Offline-first** — works without internet (IndexedDB + PWA)
+- **CSV & Excel export** with all game details
+- **Mobile-friendly UI** with collapsible sections
+- **Duplicate name prevention** in player setup
+
+---
+
+## 📸 Screenshots
+
+*(Add screenshots or GIFs here — New Game, Bets, Results, Summary)*
+
+---
+
+## 🎮 Quick Start (Players)
+
+1. **Open the app**: [d0tiks.github.io/sk-tracking](https://d0tiks.github.io/sk-tracking)
+2. **Install it** (optional):  
+   - On mobile: “Add to Home Screen” from your browser menu  
+   - On desktop: Install via browser’s PWA prompt
+3. **Start a new game**:
+   - Choose number of rounds (1–20)
+   - Add 2–10 players (no duplicate names)
+4. **Bets phase**:
+   - Enter each player’s bid for the round
+   - Total bids are checked against total tricks
+5. **Results phase**:
+   - Enter tricks won, Harry adjustment, bonus points, and special cards
+   - **Special cards are tracked for reference only** — add their points manually to the Bonus field if desired
+   - See **live projected score** before saving
+6. **Summary**:
+   - View rankings, per-round breakdown, and cumulative scores
+   - Export to CSV or Excel
+
+---
+
+## 🃏 Game Flow
+
+1. **New Game** (`NewGame.tsx`)  
+   - Set rounds & players  
+   - Prevents duplicate names  
+   - Starts with standard scoring preset
+
+2. **Bets** (`Bets.tsx`)  
+   - Enter bids (0 to `roundNumber + 1`)  
+   - Shows total tricks vs total bids  
+   - Saves to IndexedDB
+
+3. **Results** (`Results.tsx`)  
+   - Tricks, Harry adjustment, bonus, special cards  
+   - Collapsible special card section  
+   - Live projected score  
+   - Locks round after save
+
+4. **Summary** (`Summary.tsx`)  
+   - Ranking with icons (👑, 🏴‍☠️, 🧜‍♀️, 👶)  
+   - Per-round table with cumulative scores  
+   - Export CSV/Excel  
+   - Unlock & edit past rounds
+
+---
+
+## 📏 Scoring Rules
+
+**Standard preset** (`scoringConfig.ts`):
+- **Successful bid**: `bid × 20` points
+- **Failed bid**: `-10 × difference` points
+- **Zero bid success**: `roundNumber × 10` points
+- **Zero bid fail**: `-roundNumber × 10` points
+- **Harry adjustment**: ±2 to bid (if enabled)
+- **Special cards**:  
+  - All special cards are **tracked only** — they do not automatically affect the score.  
+  - If you want them to count, add their points manually in the Bonus field.
+
+---
+
+## 📦 Export Formats
+
+Exports include:
+- Game ID, date, round number
+- Player name & ID
+- Bid, adjusted bid, tricks, bonus
+- All special card counts
+- Score
+
+Formats:
+- **CSV** (via PapaParse)
+- **Excel (.xlsx)** (via SheetJS)
+
+---
+
+## 📡 Offline & PWA Support
+
+- **IndexedDB** (via Dexie.js) for local storage
+- **Installable** on mobile & desktop
+- **Works offline** — no server required
+
+---
+
+## 🛠 Tech Stack
+
+- **Frontend**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Database**: Dexie.js (IndexedDB)
+- **Routing**: React Router DOM
+- **PWA**: Vite PWA plugin + Workbox
+- **Export**: PapaParse (CSV), SheetJS (Excel)
+
+---
+
+## 📂 Project Structure
 
 ```sh
 src/
-├── components/
-│   ├── CardCounter.tsx # component for tracking special cards
-│   ├── Layout.tsx # page layout
-│   ├── NumberStepper.tsx # number selector
-│   ├── PlayerNameCombobox.tsx # player name autocomplete
-│   └── ScoreChip.tsx # score display
-├── config/
-│   └── scoringConfig.ts # scoring logic
-├── hooks/
-│   └── useGame.ts # game state hook
-├── lib/
-│   ├── db.ts # IndexedDB wrapper with Dexie.js
-│   ├── export.ts # CSV export functionality
-│   ├── score.ts # scoring calculation utils
-│   └── utils.ts # helper functions
-├── routes/
-│   ├── Bets.tsx # bid entry and management
-│   ├── Home.tsx # main dashboard and game list
-│   ├── NewGame.tsx # new game creation
-│   ├── Results.tsx # round results entry
-│   └── Summary.tsx # final score summary
-├── store/
-│   └── useStore.ts # Zustand store for global state management
-├── serviceWorker.ts # PWA service worker
-└── types.ts # TypeScript type definitions
+├── components/        # UI components
+├── config/            # Scoring presets
+├── hooks/             # Custom hooks
+├── lib/               # DB, export, scoring utils
+├── routes/            # Pages (NewGame, Bets, Results, Summary)
+├── store/             # Zustand store
+├── serviceWorker.ts   # PWA service worker
+└── types.ts           # TypeScript types
 ```
 
-## Game Flow Implementation
+---
 
-The app implements the complete Skull King game flow:
-
-1. **New Game** - Create a new game with players and number of rounds
-2. **Bets** - Enter bids for each player in the current round
-3. **Results** - Record tricks won, bonuses and special cards collected.
-4. **Summary** - View final scores and game statistics with round-by-round accumulated score
-
-## Technology Stack
-
-- **Frontend**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand (lightweight alternative to Redux)
-- **Database**: Dexie.js (wrapper around IndexedDB for client-side storage)
-- **Routing**: React Router DOM
-- **PWA Support**: Vite PWA plugin with Workbox
-
-## Data Flow and Storage
-
-- Game data is stored locally in the browser using IndexedDB via Dexie.js
-- All game state is managed through Zustand store
-- Round data includes bids, results per player, and calculated scores
-- Special card tracking for Skull King, Pirates, Mermaids, etc.
-- Automatic calculation of round scores based on configurable scoring rules
-
-## Current Features Implemented
-
-    ✓ New Game creation with player management
-    ✓ Bid entry for each player in a round
-    ✓ Results entry including tricks won and special cards (with collapsible section)
-    ✓ Automatic score calculation based on game rules
-    ✓ Round progression tracking
-    ✓ Game status management (in-progress, completed)
-    ✓ Final score summary page with round-by-round score detail
-    ✓ Local data persistence using IndexedDB
-    ✓ Responsive UI that works as a PWA
-    ✓ Export data to CSV and Excel formats
-    ✓ Progressive Web App capabilities with offline support
-    ✓ Player name autocomplete component (PlayerNameCombobox)
-    ✓ Enhanced export functionality with player names
-    ✓ Harry adjustment support for bids
-    ✓ Negative score display in red
-
-## Missing Functionality (According to Game Flow Requirements)
-
-The following features are missing from the current implementation:
-
-- Custom scoring rule configuration (basic configuration exists but not exposed in UI)
-- Advanced special card handling (more complex bonus calculations)
-- Accross games statistics and analytics dashboard
-- Player performance tracking across multiple games
-- Data import functionality (CSV/Excel)
-- Cloud synchronization between devices
-
-## Installation
+## 🚀 Installation (Developers)
 
 ```bash
-# install deps
+# Install dependencies
 bun install
-# run the dev server
+
+# Run dev server
 bun run dev
-# build for production
+
+# Build for production
 bunx vite build
 ```
-## Contributing
 
-1. Fork the repository.
-2. Create a new branch: git checkout -b feature/awesome-feature.
-3. Commit your changes with a concise message.
-4. Push and open a pull request.
+---
 
-Please follow the existing commit message guidelines and run npm run lint before submitting.
+## 🗺 Roadmap
 
-## Documentation
+- [ ] Custom scoring rules in UI
+- [ ] Automatic scoring for special cards
+- [ ] Cross-game statistics & analytics
+- [ ] Player performance tracking
+- [ ] Data import (JSON, CSV, Excel)
+- [ ] Cloud sync between devices
 
-For detailed information about recent features and enhancements, please see the [feature documentation](assistant/feature-documentation.md).
+---
 
-## Future Development Roadmap
+## 🤝 Contributing
 
-- Add support for custom scoring rules (in UI)
-- Add game statistics and analytics dashboard
-- Enhance special card handling with more complex bonus calculations
-- Add data import/export in multiple formats (JSON, CSV, Excel)
-- Add player performance tracking across games
+1. Fork the repo
+2. Create a branch: `git checkout -b feature/awesome-feature`
+3. Commit changes: `git commit -m "Add awesome feature"`
+4. Push & open a PR
+
+Run `npm run lint` before submitting.
+
+---
+
+### 🔍 Notes
+- **Special cards are tracked only** — they do not automatically affect the score.  
+- Harry adjustment is **enabled in standard preset** and can be toggled in config.
+
