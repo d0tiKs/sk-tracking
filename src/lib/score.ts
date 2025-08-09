@@ -20,15 +20,15 @@ export function calculateScore(
 }
 
 export function computeBonusFromSpecials(
-  specials: Record<string, number | undefined>,
+  specials: Record<string, { positive: number; negative: number }>,
   config: ScoringConfig
 ): number {
   let sum = 0;
-  for (const [key, count] of Object.entries(specials)) {
-    const n = count ?? 0;
+  for (const [key, counts] of Object.entries(specials)) {
     const rule = config.specials[key];
-    if (!rule) continue;
-    if (rule.points) sum += n * rule.points;
+    if (!rule?.points) continue;
+    sum += counts.positive * rule.points;
+    sum += counts.negative * -rule.points;
   }
   return sum;
 }

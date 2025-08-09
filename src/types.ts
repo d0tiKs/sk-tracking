@@ -3,8 +3,6 @@ export type UUID = string;
 export interface Player {
   id: UUID;
   name: string;
-  color?: string;
-  emoji?: string;
 }
 
 export type GameStatus = 'in-progress' | 'completed';
@@ -32,11 +30,11 @@ export interface RoundResultPerPlayer {
   tricks: number;
   bonus: number;
   specialCards: {
-    skullKing?: number;
-    second?: number;
-    pirates?: number;
-    mermaids?: number;
-    coins?: number;
+    skullKing: { positive: 0, negative: 0 },
+    second: { positive: 0, negative: 0 },
+    pirates: { positive: 0, negative: 0 },
+    mermaids: { positive: 0, negative: 0 },
+    coins: { positive: 0, negative: 0 },
     escapes?: number;
   };
   score: number;

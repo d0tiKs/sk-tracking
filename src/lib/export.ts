@@ -24,11 +24,16 @@ export function exportCSV(game: Game, rounds: Round[]) {
         adjustedBid: bid + adj,
         tricks: res.tricks,
         bonus: res.bonus,
-        skullKing: res.specialCards.skullKing ?? 0,
-        second: res.specialCards.second ?? 0,
-        pirates: res.specialCards.pirates ?? 0,
-        mermaids: res.specialCards.mermaids ?? 0,
-        coins: res.specialCards.coins ?? 0,
+        skullKing_positive: res.specialCards.skullKing?.positive ?? 0,
+        skullKing_negative: res.specialCards.skullKing?.negative ?? 0,
+        second_positive: res.specialCards.second?.positive ?? 0,
+        second_negative: res.specialCards.second?.negative ?? 0,
+        pirates_positive: res.specialCards.pirates?.positive ?? 0,
+        pirates_negative: res.specialCards.pirates?.negative ?? 0,
+        mermaids_positive: res.specialCards.mermaids?.positive ?? 0,
+        mermaids_negative: res.specialCards.mermaids?.negative ?? 0,
+        coins_positive: res.specialCards.coins?.positive ?? 0,
+        coins_negative: res.specialCards.coins?.negative ?? 0,
         score: res.score
       });
     }
@@ -57,11 +62,16 @@ export function exportXLSX(game: Game, rounds: Round[]) {
         AdjustedBid: bid + adj,
         Tricks: res.tricks,
         Bonus: res.bonus,
-        SkullKing: res.specialCards.skullKing ?? 0,
-        Second: res.specialCards.second ?? 0,
-        Pirates: res.specialCards.pirates ?? 0,
-        Mermaids: res.specialCards.mermaids ?? 0,
-        Coins: res.specialCards.coins ?? 0,
+        SkullKing_positive: res.specialCards.skullKing?.positive ?? 0,
+        SkullKing_negative: res.specialCards.skullKing?.negative ?? 0,
+        Second_positive: res.specialCards.second?.positive ?? 0,
+        Second_negative: res.specialCards.second?.negative ?? 0,
+        Pirates_positive: res.specialCards.pirates?.positive ?? 0,
+        Pirates_negative: res.specialCards.pirates?.negative ?? 0,
+        Mermaids_positive: res.specialCards.mermaids?.positive ?? 0,
+        Mermaids_negative: res.specialCards.mermaids?.negative ?? 0,
+        Coins_positive: res.specialCards.coins?.positive ?? 0,
+        Coins_negative: res.specialCards.coins?.negative ?? 0,
         Score: res.score
       });
     }

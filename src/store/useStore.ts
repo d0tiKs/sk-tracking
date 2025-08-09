@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { db } from '../lib/db';
 import { Game, Round, UUID } from '../types';
 import { uid, formatDate } from '../lib/utils';
+import { normalizeSpecialCards } from '../lib/migration';
 
 interface StoreState {
   games: Game[];
@@ -27,7 +28,21 @@ export const useStore = create<StoreState>((set, get) => ({
   async loadGame(id) {
     const game = await db.games.get(id);
     const rounds = await db.rounds.where('gameId').equals(id).sortBy('roundNumber');
-    set({ currentGame: game, rounds });
+    // Normalize special cards in loaded rounds
+    const normalizedRounds = rounds.map(r => {
+      const normalizedResults: Record<string, any> = {};
+      for (const [playerId, result] of Object.entries(r.results)) {
+        normalizedResults[playerId] = {
+          ...result,
+          specialCards: normalizeSpecialCards(result.specialCards)
+        };
+      }
+      return {
+        ...r,
+        results: normalizedResults
+      };
+    });
+    set({ currentGame: game, rounds: normalizedRounds });
   },
   async createGame(partial) {
     const id = uid();

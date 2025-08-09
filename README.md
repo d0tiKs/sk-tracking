@@ -14,14 +14,14 @@ Built with **React + TypeScript + Vite + Tailwind CSS**, it lets you **record bi
 - **Automatic score calculation** for bids/tricks/bonus
 - **Live projected score** while entering results
 - **Harry adjustment mechanic** (±2 bid tweak)
-- **Special card tracking** (Skull King, Second, Pirates, Mermaids, Coins) — *tracked only, no auto-scoring*
+- **Special card tracking** (Skull King, Second, Pirates, Mermaids, Coins) — now with separate positive and negative counters for each card type, allowing accurate tracking of both beneficial and penalizing instances. Still tracked only by default (no auto-scoring unless enabled).
 - **Per-round cumulative score tracking**
 - **Editable past rounds** (unlock feature)
 - **Offline-first** — works without internet (IndexedDB + PWA)
 - **CSV & Excel export** with all game details
 - **Mobile-friendly UI** with collapsible sections
 - **Duplicate name prevention** in player setup
-- **Randomized player order** with inline preview and confirmation before game start — improves mobile usability by replacing a modal with a streamlined inline preview, ensuring a smoother user experience during game setup.
+- **Randomized player order** with inline preview and confirmation before game start
 
 ---
 
@@ -46,7 +46,7 @@ Built with **React + TypeScript + Vite + Tailwind CSS**, it lets you **record bi
    - Total bids are checked against total tricks
 5. **Results phase**:
    - Enter tricks won, Harry adjustment, bonus points, and special cards
-   - **Special cards are tracked for reference only** — add their points manually to the Bonus field if desired
+   - **Special cards are tracked for reference only** — each card type now has separate positive and negative counters, so you can record both beneficial and penalizing instances in the same round. Add their points manually to the Bonus field if desired.
    - See **live projected score** before saving
 6. **Summary**:
    - View rankings, per-round breakdown, and cumulative scores
@@ -101,6 +101,7 @@ Exports include:
 - Player name & ID
 - Bid, adjusted bid, tricks, bonus
 - All special card counts
+- Special card counts are now exported with separate `_positive` and `_negative` columns for each card type.
 - Score
 
 Formats:

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
 import NumberStepper from '../components/NumberStepper';
+import DualCardCounter from '../components/DualCardCounter';
 import CardCounter from '../components/CardCounter';
 import { presets } from '../config/scoringConfig';
 import { calculateScore } from '../lib/score';
@@ -40,11 +41,22 @@ export default function Results() {
       const existing = round.results[p.id];
       const bid = round.bids[p.id]?.bid ?? 0;
       const adj = round.bids[p.id]?.betAdjustedByHarry ?? 0;
+      const specials = existing?.specialCards;
+      const isNumber = typeof specials === 'number';
+      const specialsValue = isNumber
+        ? { positive: specials, negative: 0 }
+        : { ...(specials ?? {}) };
       o[p.id] = {
         tricks: existing?.tricks ?? 0,
         bonus: existing?.bonus ?? 0,
         harry: adj ?? 0,
-        specials: { ...(existing?.specialCards ?? {}) },
+        specials: {
+          skullKing: specials?.skullKing ?? { positive: 0, negative: 0 },
+          second: specials?.second ?? { positive: 0, negative: 0 },
+          pirates: specials?.pirates ?? { positive: 0, negative: 0 },
+          mermaids: specials?.mermaids ?? { positive: 0, negative: 0 },
+          coins: specials?.coins ?? { positive: 0, negative: 0 }
+        },
         bid
       };
     }
@@ -240,10 +252,13 @@ export default function Results() {
                 </div>
                 {!collapsedSections[p.id] && (
                   <div className="grid grid-cols-1 gap-2 p-2">
-                    <CardCounter
+                    <DualCardCounter
                       icon="💀👑"
                       label="Skull King"
-                      value={entry.specials.skullKing ?? 0}
+                      value={{
+                        positive: entry.specials.skullKing?.positive ?? 0,
+                        negative: entry.specials.skullKing?.negative ?? 0
+                      }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
                           ...entry.specials,
@@ -251,10 +266,13 @@ export default function Results() {
                         })
                       }
                     />
-                    <CardCounter
+                    <DualCardCounter
                       icon="🦜"
                       label="Second"
-                      value={entry.specials.second ?? 0}
+                      value={{
+                        positive: entry.specials.second?.positive ?? 0,
+                        negative: entry.specials.second?.negative ?? 0
+                      }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
                           ...entry.specials,
@@ -262,10 +280,13 @@ export default function Results() {
                         })
                       }
                     />
-                    <CardCounter
+                    <DualCardCounter
                       icon="🏴‍☠️"
                       label="Pirate"
-                      value={entry.specials.pirates ?? 0}
+                      value={{
+                        positive: entry.specials.pirates?.positive ?? 0,
+                        negative: entry.specials.pirates?.negative ?? 0
+                      }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
                           ...entry.specials,
@@ -273,10 +294,13 @@ export default function Results() {
                         })
                       }
                     />
-                    <CardCounter
+                    <DualCardCounter
                       icon="🧜‍♀️"
                       label="Sirène"
-                      value={entry.specials.mermaids ?? 0}
+                      value={{
+                        positive: entry.specials.mermaids?.positive ?? 0,
+                        negative: entry.specials.mermaids?.negative ?? 0
+                      }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
                           ...entry.specials,
@@ -284,10 +308,13 @@ export default function Results() {
                         })
                       }
                     />
-                    <CardCounter
+                    <DualCardCounter
                       icon="🪙"
                       label="Pièce"
-                      value={entry.specials.coins ?? 0}
+                      value={{
+                        positive: entry.specials.coins?.positive ?? 0,
+                        negative: entry.specials.coins?.negative ?? 0
+                      }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
                       }

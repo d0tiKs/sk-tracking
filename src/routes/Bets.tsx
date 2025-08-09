@@ -60,7 +60,14 @@ export default function Bets() {
       newRound.results[p.id] = newRound.results[p.id] ?? {
         tricks: 0,
         bonus: 0,
-        specialCards: {},
+        specialCards: {
+          skullKing: { positive: 0, negative: 0 },
+          second: { positive: 0, negative: 0 },
+          pirates: { positive: 0, negative: 0 },
+          mermaids: { positive: 0, negative: 0 },
+          coins: { positive: 0, negative: 0 },
+          escapes: 0
+        },
         score: 0
       };
     }
