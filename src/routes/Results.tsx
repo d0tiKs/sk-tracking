@@ -256,8 +256,8 @@ export default function Results() {
                       icon="💀👑"
                       label="Skull King"
                       value={{
-                        positive: entry.specials.skullKing?.positive ?? 0,
-                        negative: entry.specials.skullKing?.negative ?? 0
+                        positive: entry.specials?.skullKing?.positive ?? 0,
+                        negative: entry.specials?.skullKing?.negative ?? 0
                       }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
@@ -270,8 +270,8 @@ export default function Results() {
                       icon="🦜"
                       label="Second"
                       value={{
-                        positive: entry.specials.second?.positive ?? 0,
-                        negative: entry.specials.second?.negative ?? 0
+                        positive: entry.specials?.second?.positive ?? 0,
+                        negative: entry.specials?.second?.negative ?? 0
                       }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
@@ -284,8 +284,8 @@ export default function Results() {
                       icon="🏴‍☠️"
                       label="Pirate"
                       value={{
-                        positive: entry.specials.pirates?.positive ?? 0,
-                        negative: entry.specials.pirates?.negative ?? 0
+                        positive: entry.specials?.pirates?.positive ?? 0,
+                        negative: entry.specials?.pirates?.negative ?? 0
                       }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
@@ -298,8 +298,8 @@ export default function Results() {
                       icon="🧜‍♀️"
                       label="Sirène"
                       value={{
-                        positive: entry.specials.mermaids?.positive ?? 0,
-                        negative: entry.specials.mermaids?.negative ?? 0
+                        positive: entry.specials?.mermaids?.positive ?? 0,
+                        negative: entry.specials?.mermaids?.negative ?? 0
                       }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', {
@@ -312,8 +312,8 @@ export default function Results() {
                       icon="🪙"
                       label="Pièce"
                       value={{
-                        positive: entry.specials.coins?.positive ?? 0,
-                        negative: entry.specials.coins?.negative ?? 0
+                        positive: entry.specials?.coins?.positive ?? 0,
+                        negative: entry.specials?.coins?.negative ?? 0
                       }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', { ...entry.specials, coins: v })

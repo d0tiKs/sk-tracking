@@ -1,5 +1,6 @@
-	import { useState } from "react";
-import { mergeProps, useLongPress, usePress } from "react-aria";
+import { useState, useEffect } from "react";
+import { mergeProps, usePress, useLongPress } from "react-aria";
+import { useHaptics } from "../hooks/useHaptics";
 
 interface DualCardCounterProps {
   icon: string;
@@ -12,10 +13,17 @@ export default function DualCardCounter({
   icon,
   label,
   value,
-  onChange
+  onChange,
 }: DualCardCounterProps) {
   const [positiveCount, setPositiveCount] = useState(value.positive);
   const [negativeCount, setNegativeCount] = useState(value.negative);
+  const haptics = useHaptics();
+
+  // Sync with parent value
+  useEffect(() => {
+    setPositiveCount(value.positive);
+    setNegativeCount(value.negative);
+  }, [value]);
 
   const handlePositiveClick = () => {
     const newPositive = positiveCount + 1;
@@ -24,7 +32,7 @@ export default function DualCardCounter({
   };
 
   const handleNegativeClick = () => {
-    const newNegative = negativeCount - 1; // stay truly negative
+    const newNegative = negativeCount - 1;
     setNegativeCount(newNegative);
     onChange({ positive: positiveCount, negative: newNegative });
   };
@@ -32,28 +40,28 @@ export default function DualCardCounter({
   const resetPositive = () => {
     setPositiveCount(0);
     onChange({ positive: 0, negative: negativeCount });
+    haptics.strong();
   };
 
   const resetNegative = () => {
     setNegativeCount(0);
     onChange({ positive: positiveCount, negative: 0 });
+    haptics.strong();
   };
 
-  // Positive button interactions
   const { pressProps: posPress } = usePress({ onPress: handlePositiveClick });
   const { longPressProps: posLong } = useLongPress({
     onLongPress: resetPositive,
     threshold: 500,
-    accessibilityDescription: "Long press to reset the plus counter"
+    accessibilityDescription: "Long press to reset the plus counter",
   });
   const positiveProps = mergeProps(posPress, posLong);
 
-  // Negative button interactions
   const { pressProps: negPress } = usePress({ onPress: handleNegativeClick });
   const { longPressProps: negLong } = useLongPress({
     onLongPress: resetNegative,
     threshold: 500,
-    accessibilityDescription: "Long press to reset the minus counter"
+    accessibilityDescription: "Long press to reset the minus counter",
   });
   const negativeProps = mergeProps(negPress, negLong);
 
@@ -63,34 +71,18 @@ export default function DualCardCounter({
         <span className="text-xl leading-none">{icon}</span>
         <span className="opacity-80">{label}</span>
       </div>
-
       <div className="flex items-center gap-2">
-        {/* Minus on the left (red border) */}
         <button
           {...negativeProps}
-          className="btn btn-ghost px-2 py-1 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-          aria-label={`${label} negative`}
-          aria-valuenow={negativeCount}
-          aria-valuemin={-99}
-          aria-valuemax={0}
-          role="spinbutton"
-          data-testid="negative-button"
+          className="btn btn-ghost px-2 py-1 border border-red-500 text-red-500 hover:text-white"
         >
           <span className="text-sm font-medium">
             {negativeCount === 0 ? "-" : negativeCount}
           </span>
         </button>
-
-        {/* Plus on the right (green border) */}
         <button
           {...positiveProps}
-          className="btn btn-ghost px-2 py-1 border border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
-          aria-label={`${label} positive`}
-          aria-valuenow={positiveCount}
-          aria-valuemin={0}
-          aria-valuemax={99}
-          role="spinbutton"
-          data-testid="positive-button"
+          className="btn btn-ghost px-2 py-1 border border-green-500 text-green-500 hover:text-white"
         >
           <span className="text-sm font-medium">
             {positiveCount === 0 ? "+" : positiveCount}
