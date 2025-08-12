@@ -20,6 +20,7 @@ export default function Bets() {
   ) as Round | undefined;
 
   const [bids, setBids] = useState<Record<string, number>>({});
+  const [showStandings, setShowStandings] = useState(false); // Collapsible toggle
 
   useEffect(() => {
     if (round && game) {
@@ -40,6 +41,25 @@ export default function Bets() {
   const isLocked = !!round?.locked;
   const maxBid = rNum + 1;
   const totalTricks = rNum;
+
+  // --- Compute current totals for standings ---
+  const totals: Record<string, number> = {};
+  for (const p of game.players) totals[p.id] = 0;
+  for (const r of rounds) {
+    for (const [pid, res] of Object.entries(r.results) as [
+      string,
+      { score?: number }
+    ][]) {
+      totals[pid] += res?.score ?? 0;
+    }
+  }
+
+  const ranking = [...game.players]
+    .map((p) => ({ ...p, total: totals[p.id] ?? 0 }))
+    .sort((a, b) => b.total - a.total);
+
+  const rankIcon = (i: number) =>
+    i === 0 ? '👑' : i === 1 ? '🏴‍☠️' : i === 2 ? '🧜‍♀️' : i === 3 ? '👶' : '';
 
   const saveAndNext = async () => {
     const newRound: Round =
@@ -80,16 +100,63 @@ export default function Bets() {
     0
   );
 
+  const isCompleted = game.status === 'completed';
+
   return (
     <Layout
       title={`Manche ${rNum} · Paris`}
       right={
         <Link className="btn btn-ghost" to={`/game/${game.id}/dashboard`}>
-          Tableau
+          Détails
         </Link>
       }
     >
       <div className="space-y-4">
+        {/* Collapsible standings card - same style as Summary */}
+        <div className="card p-4">
+          <div
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => setShowStandings((s) => !s)}
+          >
+            <div className="text-lg font-semibold">Classement actuel</div>
+            <span className="text-sm opacity-75">
+              {showStandings ? '▼' : '▶'}
+            </span>
+          </div>
+
+          {showStandings && (
+            <>
+              <ol className="space-y-1 mt-2">
+                {ranking.map((p, i) => (
+                  <li
+                    key={p.id}
+                    className="flex items-center justify-between"
+                  >
+                    <span>
+                      {i + 1}. <span className="ml-1">{rankIcon(i)}</span>{' '}
+                      {p.name}
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {p.total}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+
+              {isCompleted ? (
+                <div className="mt-4 text-sm opacity-80">
+                  Partie terminée
+                </div>
+              ) : (
+                <div className="mt-3 text-sm opacity-80">
+                  Partie en cours — Manche {game.currentRound}/
+                  {game.totalRounds}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
         {isLocked && (
           <div className="card p-3 flex items-center justify-between">
             <div className="text-sm opacity-80">
