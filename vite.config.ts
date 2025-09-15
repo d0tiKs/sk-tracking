@@ -16,16 +16,9 @@ export default defineConfig({
       ],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,json}'],
-        navigateFallback: 'offline.html',
+        navigateFallback: 'index.html',
+        navigateFallbackAllowlist: [ new RegExp('^/sk-tracking/') ],
         runtimeCaching: [
-          {
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'pages',
-              expiration: { maxEntries: 50 }
-            }
-          },
           {
             urlPattern: ({ request }) =>
               ['style', 'script', 'worker'].includes(request.destination),

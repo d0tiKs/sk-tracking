@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
 
 export function useGame(gameId?: string) {

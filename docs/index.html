@@ -8,7 +8,7 @@
     />
 
     <!-- PWA Manifest -->
-    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="manifest" href="/sk-tracking/manifest.webmanifest" />
 
     <!-- iOS PWA Support -->
      <meta name="mobile-web-app-capable" content="yes">
@@ -18,13 +18,38 @@
       content="black-translucent"
     />
     <meta name="apple-mobile-web-app-title" content="Skull King" />
-    <link rel="apple-touch-icon" href="/sk-tracking/assets/icon-192-DujEHSWZ.png" />
+    <link rel="apple-touch-icon" href="/sk-tracking/icons/icon-192.png" />
 
     <!-- Theme Colors -->
     <meta name="theme-color" content="#1c2541" />
 
     <title>Skull King Scorekeeper</title>
-    <script type="module" crossorigin src="/sk-tracking/assets/index-BBEXoRC-.js"></script>
+    <!-- GitHub Pages SPA fallback: restore deep links encoded as ?/path&query by 404.html -->
+    <script>
+      (function () {
+        var l = window.location;
+        var base = '/sk-tracking/';
+
+        // Only run when coming from the 404 fallback pattern e.g. /sk-tracking/?/some/deep/path&x=1#hash
+        if (l.search && l.search.indexOf('?/') === 0) {
+          var rest = l.search.slice(2); // remove "?/"
+          var hash = l.hash || '';
+
+          // Split encoded path and any original query that was appended as &...
+          var amp = rest.indexOf('&');
+          var path = amp === -1 ? rest : rest.slice(0, amp);
+          var search = amp === -1 ? '' : '?' + rest.slice(amp + 1);
+
+          // Normalize and rebuild the intended URL under the base
+          path = path.replace(/^\/+/, ''); // ensure no leading slash to avoid double slashes
+          var newUrl = base + path + search + hash;
+
+          // Replace without reloading so the SPA router can take over
+          window.history.replaceState(null, '', newUrl);
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/sk-tracking/assets/index-DKhy-ewo.js"></script>
     <link rel="stylesheet" crossorigin href="/sk-tracking/assets/index-OhRJ-4ic.css">
   <link rel="manifest" href="/sk-tracking/manifest.webmanifest"></head>
   <body>

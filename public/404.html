@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting…</title>
+  <meta http-equiv="refresh" content="0; url=/sk-tracking/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+  (function() {
+    var l = window.location;
+    var base = '/sk-tracking/';
+    // If already redirected (base + ?/...), do nothing
+    if (l.pathname === base && l.search.startsWith('?/')) return;
+
+    // Compute the path relative to the base
+    var path = l.pathname || '/';
+    if (!path.startsWith('/')) path = '/' + path;
+    if (path.startsWith(base)) {
+      path = path.slice(base.length);
+    } else {
+      // Fallback: strip all leading slashes when base isn't present (custom domains)
+      path = path.replace(/^\/+/, '');
+    }
+
+    // Preserve search and hash
+    var search = l.search ? l.search.replace(/^\?/, '&') : '';
+    var hash = l.hash || '';
+
+    // Redirect to base with encoded path as ?/...
+    var redirect = base + '?/' + path + search + hash;
+    l.replace(redirect);
+  })();
+  </script>
+</head>
+<body>
+  <p>Redirecting to the app…</p>
+  <noscript>
+    <p>This page requires JavaScript to redirect.
+      <a href="/sk-tracking/">Go to the app root</a>.
+    </p>
+  </noscript>
+</body>
+</html>

@@ -9,6 +9,7 @@ import { presets } from '../config/scoringConfig';
 import { calculateScore } from '../lib/score';
 import { Round } from '../types';
 import { useStore } from '../store/useStore';
+import { uid } from '../lib/utils';
 
 export default function Results() {
   const { gameId, roundNumber } = useParams();
@@ -18,7 +19,8 @@ export default function Results() {
     useStore();
 
   const rNum = Number(roundNumber || 1);
-
+  
+  // If the game hasn't hydrated yet, keep showing a loading state instead of erroring.
   if (!game) {
     return <Layout title="Chargement">Chargement…</Layout>;
   }
@@ -28,19 +30,41 @@ export default function Results() {
     [rounds, rNum]
   );
 
-  if (!round) {
-    return <Layout title="Erreur">Round introuvable</Layout>;
-  }
+  // Build an effective round model: use existing round if present, otherwise
+  // construct an empty default so the UI can render inputs for first-time visits.
+  const effectiveRound: Round = useMemo(
+    () =>
+      round ?? {
+        id: uid(),
+        gameId: game.id,
+        roundNumber: rNum,
+        bids: {},
+        results: {},
+        locked: false
+      },
+    [round, game.id, rNum]
+  );
+// Debug logs to validate round loading behavior
+if ((import.meta as any).env?.DEV) {
+  // eslint-disable-next-line no-console
+  console.debug('[Results] render', {
+    gameId: game.id,
+    rNum,
+    foundExistingRound: !!round,
+    effectiveRoundId: effectiveRound.id,
+    isLocked: !!effectiveRound.locked
+  });
+}
 
   const config = presets.standard;
-  const isLocked = !!round.locked;
+  const isLocked = !!effectiveRound.locked;
 
   const [local, setLocal] = useState<Record<string, any>>(() => {
     const o: Record<string, any> = {};
     for (const p of game.players) {
-      const existing = round.results[p.id];
-      const bid = round.bids[p.id]?.bid ?? 0;
-      const adj = round.bids[p.id]?.betAdjustedByHarry ?? 0;
+      const existing = effectiveRound.results[p.id];
+      const bid = effectiveRound.bids[p.id]?.bid ?? 0;
+      const adj = effectiveRound.bids[p.id]?.betAdjustedByHarry ?? 0;
       const specials = existing?.specialCards;
       const isNumber = typeof specials === 'number';
       const specialsValue = isNumber
@@ -50,6 +74,7 @@ export default function Results() {
         tricks: existing?.tricks ?? 0,
         bonus: existing?.bonus ?? 0,
         harry: adj ?? 0,
+        // Default all special card counters to 0 when results are missing
         specials: {
           skullKing: specials?.skullKing ?? { positive: 0, negative: 0 },
           second: specials?.second ?? { positive: 0, negative: 0 },
@@ -79,7 +104,8 @@ export default function Results() {
     setLocal((s) => ({ ...s, [pid]: { ...s[pid], [key]: value } }));
 
   const saveRound = async () => {
-    const updated: Round = { ...round };
+    // Start from the effective round (existing or defaulted)
+    const updated: Round = { ...effectiveRound };
     for (const p of game.players) {
       const pid = p.id;
       const entry = local[pid];
@@ -384,3 +410,4 @@ export default function Results() {
     </Layout>
   );
 }
+
