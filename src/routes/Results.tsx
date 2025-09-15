@@ -55,7 +55,10 @@ export default function Results() {
           second: specials?.second ?? { positive: 0, negative: 0 },
           pirates: specials?.pirates ?? { positive: 0, negative: 0 },
           mermaids: specials?.mermaids ?? { positive: 0, negative: 0 },
-          coins: specials?.coins ?? { positive: 0, negative: 0 }
+          coins: specials?.coins ?? { positive: 0, negative: 0 },
+          beasts: specials?.beasts ?? { positive: 0, negative: 0 },
+          rascalGamble: specials?.rascalGamble ?? { positive: 0, negative: 0 },
+          punishment: specials?.punishment ?? { negative: 0 }
         },
         bid
       };
@@ -317,6 +320,39 @@ export default function Results() {
                       }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
+                      }
+                    />
+                    <DualCardCounter
+                      icon="🦑"
+                      label="Monstre"
+                      value={{
+                        positive: entry.specials?.beasts?.positive ?? 0,
+                        negative: entry.specials?.beasts?.negative ?? 0
+                      }}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', { ...entry.specials, beasts: v })
+                      }
+                    />
+                    <DualCardCounter
+                      icon="🎰"
+                      label="rascalGamble"
+                      value={{
+                        positive: entry.specials?.rascalGamble?.positive ?? 0,
+                        negative: entry.specials?.rascalGamble?.negative ?? 0
+                      }}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', { ...entry.specials, rascalGamble: v })
+                      }
+                    />
+                    <DualCardCounter
+                      icon="🚩"
+                      label="Punition"
+                      value={{
+                        positive: entry.specials?.punishment?.positive ?? 0,
+                        negative: entry.specials?.punishment?.negative ?? 0
+                      }}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', { ...entry.specials, punishment: v })
                       }
                     />
                   </div>

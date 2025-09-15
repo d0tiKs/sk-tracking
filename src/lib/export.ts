@@ -34,6 +34,11 @@ export function exportCSV(game: Game, rounds: Round[]) {
         mermaids_negative: res.specialCards.mermaids?.negative ?? 0,
         coins_positive: res.specialCards.coins?.positive ?? 0,
         coins_negative: res.specialCards.coins?.negative ?? 0,
+        beasts_positive: res.specialCards.beasts?.positive ?? 0,
+        beasts_negative: res.specialCards.beasts?.negative ?? 0,
+        rascalGamble_positive: res.specialCards.rascalGamble?.positive ?? 0,
+        rascalGamble_negative: res.specialCards.rascalGamble?.negative ?? 0,
+        punishment_negative: res.specialCards.punishment?.negative ?? 0,
         score: res.score
       });
     }
@@ -72,6 +77,12 @@ export function exportXLSX(game: Game, rounds: Round[]) {
         Mermaids_negative: res.specialCards.mermaids?.negative ?? 0,
         Coins_positive: res.specialCards.coins?.positive ?? 0,
         Coins_negative: res.specialCards.coins?.negative ?? 0,
+        beasts_positive: res.specialCards.beasts?.positive ?? 0,
+        beasts_negative: res.specialCards.beasts?.negative ?? 0,
+        rascalGamble_positive: res.specialCards.rascalGamble?.positive ?? 0,
+        rascalGamble_negative: res.specialCards.rascalGamble?.negative ?? 0,
+        Punishment_positive: res.specialCards.punishment?.positive ?? 0,
+        Punishment_negative: res.specialCards.punishment?.negative ?? 0,
         Score: res.score
       });
     }
