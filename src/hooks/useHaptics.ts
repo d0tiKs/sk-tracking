@@ -6,8 +6,15 @@ function isIOS() {
   );
 }
 
+/**
+ * Global haptics toggle.
+ * Set to false to completely disable vibration in the app (for PWA/iOS issues).
+ */
+const ENABLE_HAPTICS = false;
+
 export function useHaptics() {
   const supported =
+    ENABLE_HAPTICS &&
     typeof navigator !== "undefined" &&
     typeof (navigator as any).vibrate === "function" &&
     !isIOS();
@@ -27,7 +34,7 @@ export function useHaptics() {
 
   return {
     supported,
-    tick: () => vibrate(15),
-    strong: () => vibrate([20, 40, 20]),
+    tick: () => false,
+    strong: () => false,
   };
 }

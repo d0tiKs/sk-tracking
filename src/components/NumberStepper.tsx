@@ -11,11 +11,8 @@ export default function NumberStepper({
   max?: number;
   onChange: (v: number) => void;
 }) {
-  const vibrate = () => {
-    try {
-      navigator.vibrate?.(10);
-    } catch {}
-  };
+  // Haptics disabled for mobile/PWA reliability
+  const vibrate = () => {};
   const dec = () => {
     onChange(Math.max(min, value - 1));
     vibrate();

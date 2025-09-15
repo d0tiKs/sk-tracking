@@ -9,11 +9,8 @@ export default function CardCounter({
   value: number;
   onChange: (v: number) => void;
 }) {
-  const vibrate = () => {
-    try {
-      navigator.vibrate?.(10);
-    } catch {}
-  };
+  // Haptics disabled for mobile/PWA reliability
+  const vibrate = () => {};
   return (
     <div className="flex items-center justify-between rounded-lg bg-surface/60 border border-white/5 px-3 py-2">
       <div className="flex items-center gap-2">

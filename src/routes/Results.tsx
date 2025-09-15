@@ -44,17 +44,6 @@ export default function Results() {
       },
     [round, game.id, rNum]
   );
-// Debug logs to validate round loading behavior
-if ((import.meta as any).env?.DEV) {
-  // eslint-disable-next-line no-console
-  console.debug('[Results] render', {
-    gameId: game.id,
-    rNum,
-    foundExistingRound: !!round,
-    effectiveRoundId: effectiveRound.id,
-    isLocked: !!effectiveRound.locked
-  });
-}
 
   const config = presets.standard;
   const isLocked = !!effectiveRound.locked;
@@ -283,7 +272,7 @@ if ((import.meta as any).env?.DEV) {
                   <div className="grid grid-cols-1 gap-2 p-2">
                     <DualCardCounter
                       icon="💀👑"
-                      label="Skull King"
+                      label=""
                       value={{
                         positive: entry.specials?.skullKing?.positive ?? 0,
                         negative: entry.specials?.skullKing?.negative ?? 0
@@ -297,7 +286,7 @@ if ((import.meta as any).env?.DEV) {
                     />
                     <DualCardCounter
                       icon="🦜"
-                      label="Second"
+                      label=""
                       value={{
                         positive: entry.specials?.second?.positive ?? 0,
                         negative: entry.specials?.second?.negative ?? 0
@@ -311,7 +300,7 @@ if ((import.meta as any).env?.DEV) {
                     />
                     <DualCardCounter
                       icon="🏴‍☠️"
-                      label="Pirate"
+                      label=""
                       value={{
                         positive: entry.specials?.pirates?.positive ?? 0,
                         negative: entry.specials?.pirates?.negative ?? 0
@@ -325,7 +314,7 @@ if ((import.meta as any).env?.DEV) {
                     />
                     <DualCardCounter
                       icon="🧜‍♀️"
-                      label="Sirène"
+                      label=""
                       value={{
                         positive: entry.specials?.mermaids?.positive ?? 0,
                         negative: entry.specials?.mermaids?.negative ?? 0
@@ -339,7 +328,7 @@ if ((import.meta as any).env?.DEV) {
                     />
                     <DualCardCounter
                       icon="🪙"
-                      label="Pièce"
+                      label=""
                       value={{
                         positive: entry.specials?.coins?.positive ?? 0,
                         negative: entry.specials?.coins?.negative ?? 0
@@ -350,7 +339,7 @@ if ((import.meta as any).env?.DEV) {
                     />
                     <DualCardCounter
                       icon="🦑"
-                      label="Monstre"
+                      label=""
                       value={{
                         positive: entry.specials?.beasts?.positive ?? 0,
                         negative: entry.specials?.beasts?.negative ?? 0
@@ -361,7 +350,7 @@ if ((import.meta as any).env?.DEV) {
                     />
                     <DualCardCounter
                       icon="🎰"
-                      label="rascalGamble"
+                      label=""
                       value={{
                         positive: entry.specials?.rascalGamble?.positive ?? 0,
                         negative: entry.specials?.rascalGamble?.negative ?? 0
@@ -372,13 +361,17 @@ if ((import.meta as any).env?.DEV) {
                     />
                     <DualCardCounter
                       icon="🚩"
-                      label="Punition"
+                      label=""
                       value={{
-                        positive: entry.specials?.punishment?.positive ?? 0,
+                        positive: 0,
                         negative: entry.specials?.punishment?.negative ?? 0
                       }}
+                      disablePositive
                       onChange={(v) =>
-                        setPlayer(p.id, 'specials', { ...entry.specials, punishment: v })
+                        setPlayer(p.id, 'specials', {
+                          ...entry.specials,
+                          punishment: { negative: v.negative ?? 0 }
+                        })
                       }
                     />
                   </div>
