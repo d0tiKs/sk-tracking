@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
@@ -19,7 +19,9 @@ export default function Results() {
     useStore();
 
   const rNum = Number(roundNumber || 1);
-  
+
+  console.debug('[Results] params', { gameId, roundNumber });
+  console.debug('[Results] game hydrating?', !!game);
   // If the game hasn't hydrated yet, keep showing a loading state instead of erroring.
   if (!game) {
     return <Layout title="Chargement">Chargement…</Layout>;
@@ -30,10 +32,10 @@ export default function Results() {
     [rounds, rNum]
   );
 
-  // Build an effective round model: use existing round if present, otherwise
-  // construct an empty default so the UI can render inputs for first-time visits.
-  const effectiveRound: Round = useMemo(
-    () =>
+  // Build an effective round model safely until hydration: tolerate undefined.
+  const effectiveRound = useMemo<Round | undefined>(() => {
+    if (!game) return undefined;
+    return (
       round ?? {
         id: uid(),
         gameId: game.id,
@@ -41,29 +43,31 @@ export default function Results() {
         bids: {},
         results: {},
         locked: false
-      },
-    [round, game.id, rNum]
-  );
+      }
+    );
+  }, [round, game?.id, rNum]);
 
   const config = presets.standard;
-  const isLocked = !!effectiveRound.locked;
+  const isLocked = !!effectiveRound?.locked;
 
-  const [local, setLocal] = useState<Record<string, any>>(() => {
+  // Initialize with safe empty defaults; populate via effects once hydrated.
+  const [local, setLocal] = useState<Record<string, any>>({});
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  // Populate local state when game and effectiveRound are ready
+  useEffect(() => {
+    if (!game || !effectiveRound) return;
+    console.debug('[Results] initializing local/collapsed for game', game?.id, 'round', rNum);
     const o: Record<string, any> = {};
     for (const p of game.players) {
       const existing = effectiveRound.results[p.id];
       const bid = effectiveRound.bids[p.id]?.bid ?? 0;
       const adj = effectiveRound.bids[p.id]?.betAdjustedByHarry ?? 0;
-      const specials = existing?.specialCards;
-      const isNumber = typeof specials === 'number';
-      const specialsValue = isNumber
-        ? { positive: specials, negative: 0 }
-        : { ...(specials ?? {}) };
+      const specials = existing?.specialCards ?? {};
       o[p.id] = {
         tricks: existing?.tricks ?? 0,
         bonus: existing?.bonus ?? 0,
         harry: adj ?? 0,
-        // Default all special card counters to 0 when results are missing
         specials: {
           skullKing: specials?.skullKing ?? { positive: 0, negative: 0 },
           second: specials?.second ?? { positive: 0, negative: 0 },
@@ -77,27 +81,53 @@ export default function Results() {
         bid
       };
     }
-    return o;
-  });
+    setLocal(o);
+  }, [game, effectiveRound]);
 
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
+  // Initialize collapsed sections for the current game's players
+  useEffect(() => {
+    if (!game) return;
+    console.debug('[Results] initializing local/collapsed for game', game?.id, 'round', rNum);
     const o: Record<string, boolean> = {};
     for (const p of game.players) {
-      // Default to collapsed (hidden) for all players
-      o[p.id] = true;
+      o[p.id] = true; // default collapsed
     }
-    return o;
-  });
+    setCollapsedSections(o);
+  }, [game?.id]);
 
   const setPlayer = (pid: string, key: string, value: any) =>
     setLocal((s) => ({ ...s, [pid]: { ...s[pid], [key]: value } }));
 
   const saveRound = async () => {
-    // Start from the effective round (existing or defaulted)
-    const updated: Round = { ...effectiveRound };
+    if (!game) return;
+    const baseRound: Round =
+      effectiveRound ?? {
+        id: uid(),
+        gameId: game.id,
+        roundNumber: rNum,
+        bids: {},
+        results: {},
+        locked: false
+      };
+    const updated: Round = { ...baseRound };
     for (const p of game.players) {
       const pid = p.id;
-      const entry = local[pid];
+      const entry = local[pid] ?? {
+        tricks: 0,
+        bonus: 0,
+        harry: 0,
+        specials: {
+          skullKing: { positive: 0, negative: 0 },
+          second: { positive: 0, negative: 0 },
+          pirates: { positive: 0, negative: 0 },
+          mermaids: { positive: 0, negative: 0 },
+          coins: { positive: 0, negative: 0 },
+          beasts: { positive: 0, negative: 0 },
+          rascalGamble: { positive: 0, negative: 0 },
+          punishment: { negative: 0 }
+        },
+        bid: effectiveRound?.bids?.[p.id]?.bid ?? 0
+      };
       const adjustedBid =
         entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
       const score = calculateScore(
@@ -169,7 +199,22 @@ export default function Results() {
 
       <div className="space-y-6 mt-2">
         {game.players.map((p) => {
-          const entry = local[p.id];
+          const entry = local[p.id] ?? {
+            tricks: 0,
+            bonus: 0,
+            harry: 0,
+            specials: {
+              skullKing: { positive: 0, negative: 0 },
+              second: { positive: 0, negative: 0 },
+              pirates: { positive: 0, negative: 0 },
+              mermaids: { positive: 0, negative: 0 },
+              coins: { positive: 0, negative: 0 },
+              beasts: { positive: 0, negative: 0 },
+              rascalGamble: { positive: 0, negative: 0 },
+              punishment: { negative: 0 }
+            },
+            bid: effectiveRound?.bids?.[p.id]?.bid ?? 0
+          };
           const adjustedBid =
             entry.bid + (config.allowHarryAdjustment ? entry.harry ?? 0 : 0);
           const projected = calculateScore(

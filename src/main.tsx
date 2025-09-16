@@ -7,13 +7,15 @@ import './index.css';
 
 const updateSW = registerSW({
   immediate: true,
+  scope: import.meta.env.BASE_URL,
+  swUrl: `${import.meta.env.BASE_URL}serviceWorker.js`,
   onNeedRefresh() {
     if (confirm('New version available. Reload?')) {
       updateSW(true);
     }
   },
   onOfflineReady() {
-    console.log('App ready to work offline');
+    console.debug('App ready to work offline');
   }
 });
 
