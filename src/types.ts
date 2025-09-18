@@ -34,6 +34,7 @@ export interface RoundResultPerPlayer {
     second: { positive: 0, negative: 0 },
     pirates: { positive: 0, negative: 0 },
     mermaids: { positive: 0, negative: 0 },
+    babyPirates: { positive: 0, negative: 0 },
     coins: { positive: 0, negative: 0 },
     beasts: { positive: 0, negative: 0 },
     rascalGamble: { positive: 0, negative: 0 },

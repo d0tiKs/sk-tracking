@@ -4,7 +4,6 @@ import Layout from '../components/Layout';
 import { useGame } from '../hooks/useGame';
 import NumberStepper from '../components/NumberStepper';
 import DualCardCounter from '../components/DualCardCounter';
-import CardCounter from '../components/CardCounter';
 import { presets } from '../config/scoringConfig';
 import { calculateScore } from '../lib/score';
 import { Round } from '../types';
@@ -73,6 +72,7 @@ export default function Results() {
           second: specials?.second ?? { positive: 0, negative: 0 },
           pirates: specials?.pirates ?? { positive: 0, negative: 0 },
           mermaids: specials?.mermaids ?? { positive: 0, negative: 0 },
+          babyPirate: specials?.babyPirate ?? { positive: 0, negative: 0 },
           coins: specials?.coins ?? { positive: 0, negative: 0 },
           beasts: specials?.beasts ?? { positive: 0, negative: 0 },
           rascalGamble: specials?.rascalGamble ?? { positive: 0, negative: 0 },
@@ -87,13 +87,13 @@ export default function Results() {
   // Initialize collapsed sections for the current game's players
   useEffect(() => {
     if (!game) return;
-    console.debug('[Results] initializing local/collapsed for game', game?.id, 'round', rNum);
+    console.debug('[Results] initializing local/collapsed for game', gameId, 'round', rNum);
     const o: Record<string, boolean> = {};
     for (const p of game.players) {
       o[p.id] = true; // default collapsed
     }
     setCollapsedSections(o);
-  }, [game?.id]);
+  }, [gameId]);
 
   const setPlayer = (pid: string, key: string, value: any) =>
     setLocal((s) => ({ ...s, [pid]: { ...s[pid], [key]: value } }));
@@ -121,6 +121,7 @@ export default function Results() {
           second: { positive: 0, negative: 0 },
           pirates: { positive: 0, negative: 0 },
           mermaids: { positive: 0, negative: 0 },
+          babyPirate: { positive: 0, negative: 0 },
           coins: { positive: 0, negative: 0 },
           beasts: { positive: 0, negative: 0 },
           rascalGamble: { positive: 0, negative: 0 },
@@ -208,6 +209,7 @@ export default function Results() {
               second: { positive: 0, negative: 0 },
               pirates: { positive: 0, negative: 0 },
               mermaids: { positive: 0, negative: 0 },
+              babyPirate: { positive: 0, negative: 0 },
               coins: { positive: 0, negative: 0 },
               beasts: { positive: 0, negative: 0 },
               rascalGamble: { positive: 0, negative: 0 },
@@ -314,9 +316,10 @@ export default function Results() {
                   <span className="text-sm opacity-75">Cliquez pour {collapsedSections[p.id] ? 'ouvrir' : 'fermer'}</span>
                 </div>
                 {!collapsedSections[p.id] && (
-                  <div className="grid grid-cols-1 gap-2 p-2">
+                  <div className="grid grid-cols-2 gap-2 p-2">
+                    {/* 💀👑 Skull King */}
                     <DualCardCounter
-                      icon="💀👑"
+                      icon="👑"
                       label=""
                       value={{
                         positive: entry.specials?.skullKing?.positive ?? 0,
@@ -329,6 +332,7 @@ export default function Results() {
                         })
                       }
                     />
+                    {/* 🦜 Second */}
                     <DualCardCounter
                       icon="🦜"
                       label=""
@@ -343,6 +347,7 @@ export default function Results() {
                         })
                       }
                     />
+                    {/* 🏴‍☠️ Pirates */}
                     <DualCardCounter
                       icon="🏴‍☠️"
                       label=""
@@ -357,6 +362,7 @@ export default function Results() {
                         })
                       }
                     />
+                    {/* 🧜‍♀️ Mermaids */}
                     <DualCardCounter
                       icon="🧜‍♀️"
                       label=""
@@ -371,6 +377,22 @@ export default function Results() {
                         })
                       }
                     />
+                    {/* 👶 Baby Pirate */}
+                    <DualCardCounter
+                      icon="👶"
+                      label=""
+                      value={{
+                        positive: entry.specials?.babyPirates?.positive ?? 0,
+                        negative: entry.specials?.babyPirates?.negative ?? 0
+                      }}
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', {
+                          ...entry.specials,
+                          babyPirates: v
+                        })
+                      }
+                    />
+                    {/* 🪙 Coins */}
                     <DualCardCounter
                       icon="🪙"
                       label=""
@@ -382,6 +404,7 @@ export default function Results() {
                         setPlayer(p.id, 'specials', { ...entry.specials, coins: v })
                       }
                     />
+                    {/* 🦑 Beasts */}
                     <DualCardCounter
                       icon="🦑"
                       label=""
@@ -393,6 +416,7 @@ export default function Results() {
                         setPlayer(p.id, 'specials', { ...entry.specials, beasts: v })
                       }
                     />
+                    {/* 🎰 Rascal Gamble */}
                     <DualCardCounter
                       icon="🎰"
                       label=""
@@ -404,6 +428,7 @@ export default function Results() {
                         setPlayer(p.id, 'specials', { ...entry.specials, rascalGamble: v })
                       }
                     />
+                    {/* 🚩 Punishment (negative only) */}
                     <DualCardCounter
                       icon="🚩"
                       label=""

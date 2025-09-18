@@ -26,6 +26,7 @@ export const standardScoring: ScoringConfig = {
     second: { id: 'second', icon: '🦜', label: 'Second' },
     pirates: { id: 'pirates', icon: '🏴‍☠️', label: 'Pirate' },
     mermaids: { id: 'mermaids', icon: '🧜‍♀️', label: 'Mermaid' },
+    babyPirate: { id: 'babyPirates', icon: '👶', label: 'Baby Pirate' },
     coins: { id: 'coins', icon: '🪙', label: 'Coin', points: 10 },
     beasts: { id: 'beasts', icon: '🦑', label: 'Monstre' },
     rascalGamble: { id: 'rascalGamble', icon: '🎰', label: 'Rascal Gamble' },
