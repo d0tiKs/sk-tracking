@@ -19,11 +19,12 @@ export default function Results() {
 
   const rNum = Number(roundNumber || 1);
 
+
   console.debug('[Results] params', { gameId, roundNumber });
   console.debug('[Results] game hydrating?', !!game);
   // If the game hasn't hydrated yet, keep showing a loading state instead of erroring.
   if (!game) {
-    return <Layout title="Chargement">Chargement…</Layout>;
+    nav(`/game/${gameId}/round/${rNum}/reulsts`, { replace: true });
   }
 
   const round = useMemo<Round | undefined>(
@@ -46,6 +47,17 @@ export default function Results() {
     );
   }, [round, game?.id, rNum]);
 
+  // Redirect only on reload and only if page would be blank (no game or no effectiveRound)
+  useEffect(() => {
+    const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    const isReload = navEntry?.type === 'reload';
+    //if (!isReload) return;
+    if ((!game || !effectiveRound) && gameId) {
+      nav(`/game/${gameId}/round/${rNum}/bets`, { replace: true });
+      return;
+    }
+  }, [game, effectiveRound, gameId, rNum, nav]);
+
   const config = presets.standard;
   const isLocked = !!effectiveRound?.locked;
 
@@ -55,7 +67,10 @@ export default function Results() {
 
   // Populate local state when game and effectiveRound are ready
   useEffect(() => {
-    if (!game || !effectiveRound) return;
+    if ((!game || !effectiveRound)) {
+      nav(`/game/${gameId}/round/${rNum}/bets`, { replace: true });
+      return;
+    }
     console.debug('[Results] initializing local/collapsed for game', game?.id, 'round', rNum);
     const o: Record<string, any> = {};
     for (const p of game.players) {
@@ -72,7 +87,7 @@ export default function Results() {
           second: specials?.second ?? { positive: 0, negative: 0 },
           pirates: specials?.pirates ?? { positive: 0, negative: 0 },
           mermaids: specials?.mermaids ?? { positive: 0, negative: 0 },
-          babyPirate: specials?.babyPirate ?? { positive: 0, negative: 0 },
+          babyPirates: specials?.babyPirates ?? { positive: 0, negative: 0 },
           coins: specials?.coins ?? { positive: 0, negative: 0 },
           beasts: specials?.beasts ?? { positive: 0, negative: 0 },
           rascalGamble: specials?.rascalGamble ?? { positive: 0, negative: 0 },
@@ -121,7 +136,7 @@ export default function Results() {
           second: { positive: 0, negative: 0 },
           pirates: { positive: 0, negative: 0 },
           mermaids: { positive: 0, negative: 0 },
-          babyPirate: { positive: 0, negative: 0 },
+          babyPirates: { positive: 0, negative: 0 },
           coins: { positive: 0, negative: 0 },
           beasts: { positive: 0, negative: 0 },
           rascalGamble: { positive: 0, negative: 0 },
@@ -206,7 +221,7 @@ export default function Results() {
               second: { positive: 0, negative: 0 },
               pirates: { positive: 0, negative: 0 },
               mermaids: { positive: 0, negative: 0 },
-              babyPirate: { positive: 0, negative: 0 },
+              babyPirates: { positive: 0, negative: 0 },
               coins: { positive: 0, negative: 0 },
               beasts: { positive: 0, negative: 0 },
               rascalGamble: { positive: 0, negative: 0 },
