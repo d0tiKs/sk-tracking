@@ -36,50 +36,41 @@ export default function DualCardCounter({
 
   return (
     <div className="flex items-center justify-between rounded-lg bg-surface/60 border border-white/5 px-3 py-2">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <span className="text-xl leading-none">{icon}</span>
         <span className="opacity-80">{label}</span>
-        {(pos !== 0 || neg !== 0) && (
-          <span className="font-mono ml-1 opacity-80">
-            {neg !== 0 ? neg : ''}{neg !== 0 && pos > 0 ? '|' : ''}{pos > 0 ? `+${pos}` : ''}
-          </span>
-        )}
       </div>
 
-      <div className="flex items-center gap-2">
-        {!disableNegative && (
-          <button
-            type="button"
-            className="btn btn-ghost px-2 py-1"
-            aria-label={`${label} minus`}
-            onClick={decNegative}
-          >
-            −
-          </button>
-        )}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className={`btn-xs btn-ghost px-2 py-1 ${disableNegative ? 'opacity-40 cursor-not-allowed' : 'text-red-500 hover:text-red-400'}`}
+          aria-label={`minus`}
+          onClick={disableNegative ? undefined : decNegative}
+          disabled={disableNegative}
+        >
+          {disableNegative ? '' : (neg !== 0 ? neg : '−')}
+        </button>
 
         <button
           type="button"
-          className="btn btn-ghost px-2 py-1"
-          aria-label={`${label} reset`}
+          className="btn-xs btn-ghost btn-xs px-2 py-1"
+          aria-label={`reset`}
           title="Réinitialiser"
           onClick={reset}
         >
           🔃
         </button>
 
-        {!disablePositive && (
-          <button
-            type="button"
-            className="btn btn-ghost px-2 py-1"
-            aria-label={`${label} plus`}
-            onClick={incPositive}
-          >
-            +
-          </button>
-        )}
-
-
+        <button
+          type="button"
+          className={`btn-xs btn-ghost px-2 py-1 ${disablePositive ? 'opacity-40 cursor-not-allowed' : 'text-green-500 hover:text-green-400'}`}
+          aria-label={`plus`}
+          onClick={disablePositive ? undefined : incPositive}
+          disabled={disablePositive}
+        >
+          {disablePositive ? '' : (pos > 0 ? `+${pos}` : '+')}
+        </button>
       </div>
     </div>
   );

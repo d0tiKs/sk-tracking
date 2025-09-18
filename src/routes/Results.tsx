@@ -183,9 +183,6 @@ export default function Results() {
         )}
 
         <div className="card p-3 flex items-center justify-between">
-          <div className="text-sm opacity-80">
-            Besoin d’ajuster les paris de cette manche ?
-          </div>
           <button
             className="btn btn-ghost"
             onClick={async () => {
@@ -193,7 +190,7 @@ export default function Results() {
               nav(`/game/${game.id}/round/${rNum}/bets`);
             }}
           >
-            Modifier les paris
+            Retour aux paris
           </button>
         </div>
       </div>
@@ -228,7 +225,7 @@ export default function Results() {
           );
 
           return (
-            <div key={p.id} className="card p-4 space-y-3">
+            <div key={p.id} className="card p-3 space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-lg">{p.name}</h4>
                 <div className="opacity-80">
@@ -251,7 +248,7 @@ export default function Results() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span>Harry The Giant (ajustement pari)</span>
+                  <span>Harry The Giant</span>
                   <div className="flex items-center gap-2">
                     <button
                       className="btn btn-ghost"
@@ -278,7 +275,7 @@ export default function Results() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span>Bonus (+10 / -10)</span>
+                  <span>Bonus</span>
                   <div className="flex items-center gap-2">
                     <button
                       className="btn btn-ghost"
@@ -316,7 +313,7 @@ export default function Results() {
                   <span className="text-sm opacity-75">Cliquez pour {collapsedSections[p.id] ? 'ouvrir' : 'fermer'}</span>
                 </div>
                 {!collapsedSections[p.id] && (
-                  <div className="grid grid-cols-2 gap-2 p-2">
+                  <div className="grid grid-cols-2 gap-2 p-1">
                     {/* 💀👑 Skull King */}
                     <DualCardCounter
                       icon="👑"
