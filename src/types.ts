@@ -38,6 +38,7 @@ export interface RoundResultPerPlayer {
     coins: { positive: 0, negative: 0 },
     beasts: { positive: 0, negative: 0 },
     rascalGamble: { positive: 0, negative: 0 },
+    jokerBonus : {positive: 0},
     punishment: { negative: 0 },
     escapes?: number;
   };

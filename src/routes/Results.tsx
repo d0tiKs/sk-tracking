@@ -91,6 +91,7 @@ export default function Results() {
           coins: specials?.coins ?? { positive: 0, negative: 0 },
           beasts: specials?.beasts ?? { positive: 0, negative: 0 },
           rascalGamble: specials?.rascalGamble ?? { positive: 0, negative: 0 },
+          jokerBonus: specials?.jokerBonus ?? { positive: 0 },
           punishment: specials?.punishment ?? { negative: 0 }
         },
         bid
@@ -140,6 +141,7 @@ export default function Results() {
           coins: { positive: 0, negative: 0 },
           beasts: { positive: 0, negative: 0 },
           rascalGamble: { positive: 0, negative: 0 },
+          jokerBonus: { positive: 0 }, 
           punishment: { negative: 0 }
         },
         bid: effectiveRound?.bids?.[p.id]?.bid ?? 0
@@ -225,6 +227,7 @@ export default function Results() {
               coins: { positive: 0, negative: 0 },
               beasts: { positive: 0, negative: 0 },
               rascalGamble: { positive: 0, negative: 0 },
+              jokerBonus: { positive: 0 },
               punishment: { negative: 0 }
             },
             bid: effectiveRound?.bids?.[p.id]?.bid ?? 0
@@ -438,6 +441,22 @@ export default function Results() {
                       }}
                       onChange={(v) =>
                         setPlayer(p.id, 'specials', { ...entry.specials, rascalGamble: v })
+                      }
+                    />
+                    {/* 🃏 Joker Bonus (positive only) */}
+                    <DualCardCounter
+                      icon="🃏"
+                      label=""
+                      value={{
+                        positive:  entry.specials?.jokerBonus?.positive ?? 0,
+                        negative:0
+                      }}
+                      disableNegative
+                      onChange={(v) =>
+                        setPlayer(p.id, 'specials', {
+                          ...entry.specials,
+                          jokerBonus: { positive: v.positive ?? 0 }
+                        })
                       }
                     />
                     {/* 🚩 Punishment (negative only) */}

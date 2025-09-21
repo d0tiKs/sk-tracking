@@ -30,6 +30,7 @@ export const standardScoring: ScoringConfig = {
     coins: { id: 'coins', icon: '🪙', label: 'Coin', points: 10 },
     beasts: { id: 'beasts', icon: '🦑', label: 'Monstre' },
     rascalGamble: { id: 'rascalGamble', icon: '🎰', label: 'Rascal Gamble' },
+    jokerBonus: { id: 'jokerBonus', icon: '🃏', label: 'Bonus Joker' },
     punishment: { id: 'punishment', icon: '🚩', label: 'Punition' }
   }
 };
