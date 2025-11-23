@@ -24,7 +24,7 @@ export default function Results() {
   console.debug('[Results] game hydrating?', !!game);
   // If the game hasn't hydrated yet, keep showing a loading state instead of erroring.
   if (!game) {
-    nav(`/game/${gameId}/round/${rNum}/reulsts`, { replace: true });
+    nav(`/game/${gameId}/round/${rNum}/bets`, { replace: true });
   }
 
   const round = useMemo<Round | undefined>(
@@ -301,9 +301,21 @@ export default function Results() {
                     >
                       −10
                     </button>
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setPlayer(p.id, 'bonus', entry.bonus - 5)}
+                    >
+                      −5
+                    </button>
                     <span className="w-12 text-center tabular-nums">
                       {entry.bonus}
                     </span>
+                                        <button
+                      className="btn btn-ghost"
+                      onClick={() => setPlayer(p.id, 'bonus', entry.bonus + 5)}
+                    >
+                      +5
+                    </button>
                     <button
                       className="btn btn-ghost"
                       onClick={() => setPlayer(p.id, 'bonus', entry.bonus + 10)}
